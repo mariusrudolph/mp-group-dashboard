@@ -290,7 +290,7 @@ export async function GET(request: Request) {
                     const progressValues = Object.values(teamProgress)
                         .filter(val => val !== null)
                         .map(val => parseInt(val.replace('%', '')));
-                    
+
                     if (progressValues.length > 0) {
                         overallProgress = Math.round(progressValues.reduce((a, b) => a + b, 0) / progressValues.length);
                         implementationProgress = overallProgress;
@@ -301,10 +301,10 @@ export async function GET(request: Request) {
             // Fallback to status-based progress if no team progress values
             if (overallProgress === 0) {
                 overallProgress = p.projectStatus?.includes('In Progress') ? 50 :
-                                        p.projectStatus?.includes('Done') ? 100 :
-                                        p.projectStatus?.includes('Closing') ? 90 :
-                                        p.projectStatus?.includes('In Planning') ? 25 :
-                                        p.projectStatus?.includes('Evaluation') ? 15 : 0;
+                    p.projectStatus?.includes('Done') ? 100 :
+                        p.projectStatus?.includes('Closing') ? 90 :
+                            p.projectStatus?.includes('In Planning') ? 25 :
+                                p.projectStatus?.includes('Evaluation') ? 15 : 0;
                 implementationProgress = overallProgress;
             }
 
@@ -315,8 +315,8 @@ export async function GET(request: Request) {
                 projectManager: p.projectManagerName || p.projectManager || regularProject?.manager?.name || "Unknown",
                 overallProgress: overallProgress,
                 implementationProgress: Math.min(implementationProgress, 100),
-                lastUpdated: regularProject?.lastChanged ? new Date(regularProject.lastChanged).toLocaleDateString('en-GB') : 
-                                   p.lastChanged ? new Date(p.lastChanged).toLocaleDateString('en-GB') : "Unknown",
+                lastUpdated: regularProject?.lastChanged ? new Date(regularProject.lastChanged).toLocaleDateString('en-GB') :
+                    p.lastChanged ? new Date(p.lastChanged).toLocaleDateString('en-GB') : "Unknown",
                 status: p.projectStatus,
                 teamProgress: teamProgress, // Add team progress information
                 customFields: regularProject?.customFields ? {
