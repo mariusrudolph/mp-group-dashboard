@@ -394,11 +394,11 @@ export default function Dashboard() {
                                                             marginBottom: '8px'
                                                         }}>
                                                             <span style={{ 
-                                                                fontSize: '14px',
-                                                                color: '#9ca3af',
+                                                                fontSize: '12px',
+                                                                color: 'rgb(156, 163, 175)',
                                                                 fontWeight: '500'
                                                             }}>
-                                                                Project Manager: {project.projectManager}
+                                                                PM: {project.projectManager}
                                                             </span>
                                                         </div>
                                                     )}
