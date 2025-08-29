@@ -299,7 +299,7 @@ export async function GET(request: Request) {
                     const progressValues = Object.values(teamProgress)
                         .filter(val => val !== null)
                         .map(val => parseInt(val.replace('%', '')));
-                    
+
                     if (progressValues.length > 0) {
                         implementationProgress = Math.round(progressValues.reduce((a, b) => a + b, 0) / progressValues.length);
                     }

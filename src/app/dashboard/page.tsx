@@ -387,9 +387,27 @@ export default function Dashboard() {
                                                         </p>
                                                     )}
                                                     {project.projectManager && (
-                                                        <p style={{ fontSize: '12px', color: '#9ca3af' }}>
-                                                            PM: {project.projectManager}
-                                                        </p>
+                                                        <div style={{ 
+                                                            display: 'flex', 
+                                                            justifyContent: 'space-between', 
+                                                            alignItems: 'center',
+                                                            marginBottom: '8px'
+                                                        }}>
+                                                            <span style={{ 
+                                                                fontSize: '14px',
+                                                                color: '#9ca3af',
+                                                                fontWeight: '500'
+                                                            }}>
+                                                                Project Manager
+                                                            </span>
+                                                            <span style={{ 
+                                                                fontSize: '14px',
+                                                                color: '#ffffff',
+                                                                fontWeight: '500'
+                                                            }}>
+                                                                {project.projectManager}
+                                                            </span>
+                                                        </div>
                                                     )}
                                                     <p style={{ fontSize: '12px', color: '#6b7280' }}>
                                                         Last updated: {project.lastUpdated}
@@ -433,16 +451,6 @@ export default function Dashboard() {
                                                             fontWeight: '500'
                                                         }}>
                                                             {project.overallProgress || 0}%
-                                                            {project.customFields?.completion && (
-                                                                <span style={{ 
-                                                                    fontSize: '10px', 
-                                                                    color: '#6b7280', 
-                                                                    marginLeft: '4px',
-                                                                    fontStyle: 'italic'
-                                                                }}>
-                                                                    ({project.customFields.completion})
-                                                                </span>
-                                                            )}
                                                         </span>
                                                     </div>
                                                     <div style={{
@@ -709,7 +717,7 @@ export default function Dashboard() {
                                                                 color: '#9ca3af',
                                                                 fontWeight: '500'
                                                             }}>
-                                                                Implementation
+                                                                Status-based Progress
                                                             </span>
                                                             <span style={{ 
                                                                 fontSize: '12px',
