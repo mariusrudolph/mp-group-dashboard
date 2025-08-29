@@ -151,9 +151,9 @@ export async function GET(req: Request) {
                     filteredProjects = filteredProjects.filter((p: MeisterplanProject) =>
                         p.cust_implementation_quarter_in_connect &&
                         (p.cust_implementation_quarter_in_connect.includes('Q01/25') ||
-                         p.cust_implementation_quarter_in_connect.includes('Q02/25') ||
-                         p.cust_implementation_quarter_in_connect.includes('Q03/25') ||
-                         p.cust_implementation_quarter_in_connect.includes('Q04/25'))
+                            p.cust_implementation_quarter_in_connect.includes('Q02/25') ||
+                            p.cust_implementation_quarter_in_connect.includes('Q03/25') ||
+                            p.cust_implementation_quarter_in_connect.includes('Q04/25'))
                     );
                     break;
 
@@ -186,11 +186,11 @@ export async function GET(req: Request) {
                         p.cust_business_priority === '1' ||
                         p.cust_business_priority === '2' ||
                         (p.projectStatus &&
-                         (p.projectStatus.includes('In Progress') ||
-                          p.projectStatus.includes('In Planning') ||
-                          p.projectStatus.includes('Evaluation') ||
-                          p.projectStatus.includes('Closing') ||
-                          p.projectStatus.includes('Done')));
+                            (p.projectStatus.includes('In Progress') ||
+                                p.projectStatus.includes('In Planning') ||
+                                p.projectStatus.includes('Evaluation') ||
+                                p.projectStatus.includes('Closing') ||
+                                p.projectStatus.includes('Done')));
 
                     filteredProjects = filteredProjects.filter((p: MeisterplanProject) => isConnectRelatedDefault(p) && isStrategicDefault(p));
             }
@@ -209,11 +209,11 @@ export async function GET(req: Request) {
                 p.cust_business_priority === '1' ||
                 p.cust_business_priority === '2' ||
                 (p.projectStatus &&
-                 (p.projectStatus.includes('In Progress') ||
-                  p.projectStatus.includes('In Planning') ||
-                  p.projectStatus.includes('Evaluation') ||
-                  p.projectStatus.includes('Closing') ||
-                  p.projectStatus.includes('Done')));
+                    (p.projectStatus.includes('In Progress') ||
+                        p.projectStatus.includes('In Planning') ||
+                        p.projectStatus.includes('Evaluation') ||
+                        p.projectStatus.includes('Closing') ||
+                        p.projectStatus.includes('Done')));
 
             filteredProjects = filteredProjects.filter((p: MeisterplanProject) => isConnectRelatedDefault(p) && isStrategicDefault(p));
         }
@@ -230,14 +230,14 @@ export async function GET(req: Request) {
                 parseInt(p.cust_completion_percentage_in_connect.replace('%', '')) :
                 p.cust_implementation_progress_in_connect ?
                     (p.cust_implementation_progress_in_connect === 'Concept & Design' ? 25 :
-                     p.cust_implementation_progress_in_connect === 'In Progress' ? 50 :
-                     p.cust_implementation_progress_in_connect === 'Testing' ? 75 :
-                     p.cust_implementation_progress_in_connect === 'Go Live' ? 100 : 0) :
-                (p.projectStatus?.includes('In Progress') ? 50 :
-                 p.projectStatus?.includes('Done') ? 100 :
-                 p.projectStatus?.includes('Closing') ? 90 :
-                 p.projectStatus?.includes('In Planning') ? 25 :
-                 p.projectStatus?.includes('Evaluation') ? 15 : 0),
+                        p.cust_implementation_progress_in_connect === 'In Progress' ? 50 :
+                            p.cust_implementation_progress_in_connect === 'Testing' ? 75 :
+                                p.cust_implementation_progress_in_connect === 'Go Live' ? 100 : 0) :
+                    (p.projectStatus?.includes('In Progress') ? 50 :
+                        p.projectStatus?.includes('Done') ? 100 :
+                            p.projectStatus?.includes('Closing') ? 90 :
+                                p.projectStatus?.includes('In Planning') ? 25 :
+                                    p.projectStatus?.includes('Evaluation') ? 15 : 0),
             status: p.projectStatus,
             customFields: p.cust_affected_systems ? {
                 affectedSystems: p.cust_affected_systems,
@@ -264,7 +264,7 @@ export async function GET(req: Request) {
     } catch (error: unknown) {
         console.error("Meisterplan Reporting API Error:", error);
         const errorMessage = error instanceof Error ? error.message : "Interner Server-Fehler";
-        
+
         // Bei API-Fehlern Mock-Daten zurückgeben (nur in Entwicklung)
         if (process.env.NODE_ENV === "development") {
             console.log("⚠️  API-Fehler - Verwende Mock-Daten als Fallback");
