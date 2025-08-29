@@ -64,12 +64,12 @@ export async function GET(request: Request) {
     try {
         // 1) Portfolios über Reporting API laden
         console.log("📋 Lade Portfolios über Reporting API...");
-        const portfoliosResponse = await reportingApiFetch('/v1/portfolios');
+        const portfoliosResponse = await reportingApiFetch(reportingApi.portfolios());
         const portfolios = portfoliosResponse.items || [];
         console.log("✅ Portfolios geladen:", portfolios.length);
 
         // 2) SAG Digital Portfolio finden
-        const sagDigitalPortfolio = portfolios.find((p: { portfolioName?: string }) => 
+        const sagDigitalPortfolio = portfolios.find((p: { portfolioName?: string }) =>
             p.portfolioName === process.env.MEISTERPLAN_PORTFOLIO_NAME
         );
         console.log("🎯 Verwende Portfolio:", process.env.MEISTERPLAN_PORTFOLIO_NAME, "ID:", sagDigitalPortfolio?.id);
@@ -93,19 +93,19 @@ export async function GET(request: Request) {
         const reportingApiUrl = `${reportingApi.projects()}?portfolio=${sagDigitalPortfolio.id}&scenarios=planOfRecord&startDate=2024-01-01&finishDate=2025-12-31&fields=${fields}`;
         console.log("🔗 Reporting API URL:", reportingApiUrl);
 
-        const projectsResponse = await reportingApiFetch(`/v1/projects?portfolio=${sagDigitalPortfolio.id}&scenarios=planOfRecord&startDate=2024-01-01&finishDate=2025-12-31&fields=${fields}`);
+        const projectsResponse = await reportingApiFetch(reportingApiUrl);
         const reportingProjects = projectsResponse.items || [];
         console.log("✅ Projekte über Reporting API geladen:", reportingProjects.length);
 
         // 4) Zusätzlich: Custom Fields über Regular API v1 laden
         console.log("🔗 Lade Custom Fields über Regular API v1...");
         let regularApiProjects: RegularApiProject[] = [];
-        
+
         try {
             // Get the Plan of Record scenario ID
             const scenariosResponse = await mpFetch('/v1/scenarios');
             const planOfRecord = scenariosResponse.items?.find((s: any) => s.name === 'Plan of Record');
-            
+
             if (planOfRecord?.id) {
                 // Get projects with custom fields from regular API
                 const regularResponse = await mpFetch(`/v1/scenarios/${planOfRecord.id}/projects?pageSize=500`);
@@ -142,7 +142,7 @@ export async function GET(request: Request) {
         // 6) Listen-spezifische Filter anwenden
         if (listId && listId !== 'all') {
             console.log("🎯 Wende Listen-Filter an:", listId);
-            
+
             switch (listId) {
                 case "top-initiatives-2025":
                     filteredProjects = filteredProjects.filter((p: MeisterplanProject) =>
@@ -227,7 +227,7 @@ export async function GET(request: Request) {
         // 7) Projekte auf unser DTO mappen
         const data = filteredProjects.map((p: MeisterplanProject) => {
             // Find matching project in regular API for custom fields
-            const regularProject = regularApiProjects.find(rp => 
+            const regularProject = regularApiProjects.find(rp =>
                 rp.projectKey === p.projectKey || rp.id === p.id
             );
 
@@ -253,10 +253,10 @@ export async function GET(request: Request) {
                     regularProject?.customFields?.cust_overall_project_progress?.value ?
                         parseInt(regularProject.customFields.cust_overall_project_progress.value.replace('%', '')) :
                         (p.projectStatus?.includes('In Progress') ? 50 :
-                         p.projectStatus?.includes('Done') ? 100 :
-                         p.projectStatus?.includes('Closing') ? 90 :
-                         p.projectStatus?.includes('In Planning') ? 25 :
-                         p.projectStatus?.includes('Evaluation') ? 15 : 0);
+                            p.projectStatus?.includes('Done') ? 100 :
+                                p.projectStatus?.includes('Closing') ? 90 :
+                                    p.projectStatus?.includes('In Planning') ? 25 :
+                                        p.projectStatus?.includes('Evaluation') ? 15 : 0);
 
             // Implementation progress calculation - also use Completion Percentage in Connect
             const implementationProgress = regularProject?.customFields?.cust_completion_percentage_in_connect?.value ?
@@ -273,9 +273,9 @@ export async function GET(request: Request) {
                                     parseInt(p.cust_technical_progress.replace('%', '')) :
                                     p.cust_implementation_progress_in_connect ?
                                         (p.cust_implementation_progress_in_connect === 'Concept & Design' ? 25 :
-                                         p.cust_implementation_progress_in_connect === 'In Progress' ? 50 :
-                                         p.cust_implementation_progress_in_connect === 'Testing' ? 75 :
-                                         p.cust_implementation_progress_in_connect === 'Go Live' ? 100 : 0) :
+                                            p.cust_implementation_progress_in_connect === 'In Progress' ? 50 :
+                                                p.cust_implementation_progress_in_connect === 'Testing' ? 75 :
+                                                    p.cust_implementation_progress_in_connect === 'Go Live' ? 100 : 0) :
                                         overallProgress; // Use overall progress as fallback
 
             return {
@@ -285,8 +285,8 @@ export async function GET(request: Request) {
                 projectManager: p.projectManagerName || p.projectManager || regularProject?.manager?.name || "Unknown",
                 overallProgress: overallProgress,
                 implementationProgress: Math.min(implementationProgress, 100),
-                lastUpdated: regularProject?.lastChanged ? new Date(regularProject.lastChanged).toLocaleDateString('en-GB') : 
-                           p.lastChanged ? new Date(p.lastChanged).toLocaleDateString('en-GB') : "Unknown",
+                lastUpdated: regularProject?.lastChanged ? new Date(regularProject.lastChanged).toLocaleDateString('en-GB') :
+                    p.lastChanged ? new Date(p.lastChanged).toLocaleDateString('en-GB') : "Unknown",
                 status: p.projectStatus,
                 customFields: regularProject?.customFields ? {
                     affectedSystems: regularProject.customFields.cust_affected_systems?.value,
@@ -323,7 +323,7 @@ export async function GET(request: Request) {
     } catch (error: unknown) {
         const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
         console.error('❌ Meisterplan Reporting API Error:', error);
-        
+
         // Return empty array instead of mock data to ensure real data only
         return NextResponse.json({
             portfolio: "SAG Digital",
