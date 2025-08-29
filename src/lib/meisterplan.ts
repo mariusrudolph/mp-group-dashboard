@@ -28,9 +28,11 @@ export async function mpFetch(path: string, init: RequestInit = {}) {
 }
 
 // Reporting API Endpunkte
+const REPORTING_API_BASE_URL = "https://api-reporting.eu.meisterplan.com/v1";
+
 export const reportingApi = {
     // Basis-URL für Reporting API (EU)
-    baseUrl: "https://api-reporting.eu.meisterplan.com/v1",
+    baseUrl: REPORTING_API_BASE_URL,
 
     // Projekte mit Custom Fields laden
     projects: (params: {
@@ -41,7 +43,7 @@ export const reportingApi = {
         fields?: string[];
         obsFilters?: Record<string, string>;
     } = {}) => {
-        const url = new URL(`${reportingApi.baseUrl}/projects`);
+        const url = new URL(`${REPORTING_API_BASE_URL}/projects`);
 
         // Standard-Parameter
         if (params.portfolio) url.searchParams.set("portfolio", params.portfolio);
@@ -65,10 +67,10 @@ export const reportingApi = {
     },
 
     // Portfolios laden
-    portfolios: () => `${reportingApi.baseUrl}/portfolios`,
+    portfolios: () => `${REPORTING_API_BASE_URL}/portfolios`,
 
     // Szenarien laden
-    scenarios: () => `${reportingApi.baseUrl}/scenarios`,
+    scenarios: () => `${REPORTING_API_BASE_URL}/scenarios`,
 };
 
 // Hilfsfunktion für Reporting API Calls
