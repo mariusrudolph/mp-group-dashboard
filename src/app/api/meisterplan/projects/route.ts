@@ -266,13 +266,9 @@ export async function GET(request: Request) {
                 bbv: regularProject?.customFields?.cust_completion_percentage_in_bbv?.value || null
             };
 
-            // Count how many teams have progress values
-            const teamsWithProgress = Object.values(teamProgress).filter(val => val !== null).length;
-
-            // Overall project progress - prioritize cust_completion field
-            let overallProgress = 0;
+            // Overall project progress - only use cust_completion if it has a value
+            let overallProgress = null;
             if (regularProject?.customFields?.cust_completion?.value) {
-                // Use cust_completion as primary source for overall progress
                 const completionValue = regularProject.customFields.cust_completion.value;
                 if (completionValue.includes('%')) {
                     overallProgress = parseInt(completionValue.replace('%', ''));
@@ -281,8 +277,9 @@ export async function GET(request: Request) {
                 }
             }
 
-            // Implementation progress - use team progress or fallback to overall
-            let implementationProgress = 0;
+            // Implementation progress - only use team progress if it has values
+            let implementationProgress = null;
+            const teamsWithProgress = Object.values(teamProgress).filter(val => val !== null).length;
 
             if (teamsWithProgress === 1) {
                 // Single team: use the value that exists
@@ -306,26 +303,14 @@ export async function GET(request: Request) {
                 }
             }
 
-            // Fallback to status-based progress if no progress values found
-            if (overallProgress === 0) {
-                overallProgress = p.projectStatus?.includes('In Progress') ? 50 :
-                    p.projectStatus?.includes('Done') ? 100 :
-                        p.projectStatus?.includes('Closing') ? 90 :
-                            p.projectStatus?.includes('In Planning') ? 25 :
-                                p.projectStatus?.includes('Evaluation') ? 15 : 0;
-            }
-
-            if (implementationProgress === 0) {
-                implementationProgress = overallProgress;
-            }
-
+            // Remove status-based fallback - only show progress when custom fields have values
             return {
                 id: p.scenarioProjectId || p.projectId || p.id || '',
                 name: p.projectName || p.name || "(Unnamed)",
                 projectKey: p.projectKey || "",
                 projectManager: p.projectManagerName || p.projectManager || regularProject?.manager?.name || "Unknown",
-                overallProgress: overallProgress,
-                implementationProgress: Math.min(implementationProgress, 100),
+                overallProgress: overallProgress, // Can be null if no cust_completion value
+                implementationProgress: implementationProgress, // Can be null if no team progress values
                 lastUpdated: regularProject?.lastChanged ? new Date(regularProject.lastChanged).toLocaleDateString('en-GB') :
                     p.lastChanged ? new Date(p.lastChanged).toLocaleDateString('en-GB') : "Unknown",
                 status: p.projectStatus,

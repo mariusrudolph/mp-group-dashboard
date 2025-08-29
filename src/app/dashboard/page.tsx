@@ -398,14 +398,7 @@ export default function Dashboard() {
                                                                 color: '#9ca3af',
                                                                 fontWeight: '500'
                                                             }}>
-                                                                Project Manager
-                                                            </span>
-                                                            <span style={{ 
-                                                                fontSize: '14px',
-                                                                color: '#ffffff',
-                                                                fontWeight: '500'
-                                                            }}>
-                                                                {project.projectManager}
+                                                                Project Manager: {project.projectManager}
                                                             </span>
                                                         </div>
                                                     )}
@@ -424,81 +417,80 @@ export default function Dashboard() {
                                                         flexShrink: 0
                                                     }}
                                                 >
-                                                    {Math.round(project.overallProgress)}%
+                                                    {/* Only show percentage if overallProgress has a value */}
+                                                    {project.overallProgress !== null ? `${project.overallProgress}%` : ''}
                                                 </motion.span>
                                             </div>
                                             
                                             {/* Progress Bars */}
                                             <div style={{ marginTop: '16px' }}>
-                                                {/* Overall Progress Bar */}
-                                                <div style={{ marginBottom: '12px' }}>
-                                                    <div style={{ 
-                                                        display: 'flex', 
-                                                        justifyContent: 'space-between', 
-                                                        alignItems: 'center',
-                                                        marginBottom: '4px'
-                                                    }}>
-                                                        <span style={{ 
-                                                            fontSize: '12px',
-                                                            color: '#9ca3af',
-                                                            fontWeight: '500'
+                                                {/* Overall Progress Bar - only show if overallProgress has a value */}
+                                                {project.overallProgress !== null && (
+                                                    <div style={{ marginBottom: '12px' }}>
+                                                        <div style={{ 
+                                                            display: 'flex', 
+                                                            justifyContent: 'space-between', 
+                                                            alignItems: 'center',
+                                                            marginBottom: '4px'
                                                         }}>
-                                                            Overall Progress
-                                                        </span>
-                                                        <span style={{ 
-                                                            fontSize: '12px',
-                                                            color: '#9ca3af',
-                                                            fontWeight: '500'
+                                                            <span style={{ 
+                                                                fontSize: '12px',
+                                                                color: '#9ca3af',
+                                                                fontWeight: '500'
+                                                            }}>
+                                                                Overall Progress
+                                                            </span>
+                                                            <span style={{ 
+                                                                fontSize: '12px',
+                                                                color: '#9ca3af',
+                                                                fontWeight: '500'
+                                                            }}>
+                                                                {project.overallProgress}%
+                                                            </span>
+                                                        </div>
+                                                        <div style={{
+                                                            width: '100%',
+                                                            height: '8px',
+                                                            backgroundColor: '#374151',
+                                                            borderRadius: '4px',
+                                                            overflow: 'hidden'
                                                         }}>
-                                                            {project.overallProgress || 0}%
-                                                        </span>
+                                                            <motion.div
+                                                                initial={{ width: 0 }}
+                                                                animate={{ width: `${project.overallProgress}%` }}
+                                                                transition={{ duration: 1, ease: "easeOut" }}
+                                                                style={{
+                                                                    height: '100%',
+                                                                    backgroundColor: '#10b981',
+                                                                    borderRadius: '4px'
+                                                                }}
+                                                            />
+                                                        </div>
                                                     </div>
-                                                    <div style={{
-                                                        width: '100%',
-                                                        height: '8px',
-                                                        backgroundColor: '#374151',
-                                                        borderRadius: '4px',
-                                                        overflow: 'hidden'
-                                                    }}>
-                                                        <motion.div
-                                                            initial={{ width: 0 }}
-                                                            animate={{ width: `${project.overallProgress || 0}%` }}
-                                                            transition={{ duration: 1, ease: "easeOut" }}
-                                                            style={{
-                                                                height: '100%',
-                                                                backgroundColor: '#10b981',
-                                                                borderRadius: '4px'
-                                                            }}
-                                                        />
-                                                    </div>
-                                                </div>
+                                                )}
 
-                                                {/* Team Progress Bars */}
+                                                {/* Team Progress Bars - only show if they have values */}
                                                 {project.teamProgress && (
                                                     <>
                                                         {/* Connect Progress */}
                                                         {project.teamProgress.connect && (
                                                             <div style={{ marginBottom: '12px' }}>
-                                                                <div style={{ 
-                                                                    display: 'flex', 
-                                                                    justifyContent: 'space-between', 
+                                                                <div style={{
+                                                                    display: 'flex',
+                                                                    justifyContent: 'space-between',
                                                                     alignItems: 'center',
                                                                     marginBottom: '4px'
                                                                 }}>
-                                                                    <span style={{ 
+                                                                    <span style={{
                                                                         fontSize: '12px',
                                                                         color: '#9ca3af',
                                                                         fontWeight: '500'
-                                                                    }}>
-                                                                        Connect
-                                                                    </span>
-                                                                    <span style={{ 
+                                                                    }}>Connect</span>
+                                                                    <span style={{
                                                                         fontSize: '12px',
                                                                         color: '#9ca3af',
                                                                         fontWeight: '500'
-                                                                    }}>
-                                                                        {project.teamProgress.connect}
-                                                                    </span>
+                                                                    }}>{project.teamProgress.connect}</span>
                                                                 </div>
                                                                 <div style={{
                                                                     width: '100%',
@@ -524,26 +516,22 @@ export default function Dashboard() {
                                                         {/* D365 Progress */}
                                                         {project.teamProgress.d365 && (
                                                             <div style={{ marginBottom: '12px' }}>
-                                                                <div style={{ 
-                                                                    display: 'flex', 
-                                                                    justifyContent: 'space-between', 
+                                                                <div style={{
+                                                                    display: 'flex',
+                                                                    justifyContent: 'space-between',
                                                                     alignItems: 'center',
                                                                     marginBottom: '4px'
                                                                 }}>
-                                                                    <span style={{ 
+                                                                    <span style={{
                                                                         fontSize: '12px',
                                                                         color: '#9ca3af',
                                                                         fontWeight: '500'
-                                                                    }}>
-                                                                        Dynamics
-                                                                    </span>
-                                                                    <span style={{ 
+                                                                    }}>Dynamics</span>
+                                                                    <span style={{
                                                                         fontSize: '12px',
                                                                         color: '#9ca3af',
                                                                         fontWeight: '500'
-                                                                    }}>
-                                                                        {project.teamProgress.d365}
-                                                                    </span>
+                                                                    }}>{project.teamProgress.d365}</span>
                                                                 </div>
                                                                 <div style={{
                                                                     width: '100%',
@@ -569,26 +557,22 @@ export default function Dashboard() {
                                                         {/* Boomi Progress */}
                                                         {project.teamProgress.boomi && (
                                                             <div style={{ marginBottom: '12px' }}>
-                                                                <div style={{ 
-                                                                    display: 'flex', 
-                                                                    justifyContent: 'space-between', 
+                                                                <div style={{
+                                                                    display: 'flex',
+                                                                    justifyContent: 'space-between',
                                                                     alignItems: 'center',
                                                                     marginBottom: '4px'
                                                                 }}>
-                                                                    <span style={{ 
+                                                                    <span style={{
                                                                         fontSize: '12px',
                                                                         color: '#9ca3af',
                                                                         fontWeight: '500'
-                                                                    }}>
-                                                                        Boomi
-                                                                    </span>
-                                                                    <span style={{ 
+                                                                    }}>Boomi</span>
+                                                                    <span style={{
                                                                         fontSize: '12px',
                                                                         color: '#9ca3af',
                                                                         fontWeight: '500'
-                                                                    }}>
-                                                                        {project.teamProgress.boomi}
-                                                                    </span>
+                                                                    }}>{project.teamProgress.boomi}</span>
                                                                 </div>
                                                                 <div style={{
                                                                     width: '100%',
@@ -614,26 +598,22 @@ export default function Dashboard() {
                                                         {/* BI Progress */}
                                                         {project.teamProgress.bi && (
                                                             <div style={{ marginBottom: '12px' }}>
-                                                                <div style={{ 
-                                                                    display: 'flex', 
-                                                                    justifyContent: 'space-between', 
+                                                                <div style={{
+                                                                    display: 'flex',
+                                                                    justifyContent: 'space-between',
                                                                     alignItems: 'center',
                                                                     marginBottom: '4px'
                                                                 }}>
-                                                                    <span style={{ 
+                                                                    <span style={{
                                                                         fontSize: '12px',
                                                                         color: '#9ca3af',
                                                                         fontWeight: '500'
-                                                                    }}>
-                                                                        Datawarehouse
-                                                                    </span>
-                                                                    <span style={{ 
+                                                                    }}>Datawarehouse</span>
+                                                                    <span style={{
                                                                         fontSize: '12px',
                                                                         color: '#9ca3af',
                                                                         fontWeight: '500'
-                                                                    }}>
-                                                                        {project.teamProgress.bi}
-                                                                    </span>
+                                                                    }}>{project.teamProgress.bi}</span>
                                                                 </div>
                                                                 <div style={{
                                                                     width: '100%',
@@ -659,26 +639,22 @@ export default function Dashboard() {
                                                         {/* BBV Progress */}
                                                         {project.teamProgress.bbv && (
                                                             <div style={{ marginBottom: '12px' }}>
-                                                                <div style={{ 
-                                                                    display: 'flex', 
-                                                                    justifyContent: 'space-between', 
+                                                                <div style={{
+                                                                    display: 'flex',
+                                                                    justifyContent: 'space-between',
                                                                     alignItems: 'center',
                                                                     marginBottom: '4px'
                                                                 }}>
-                                                                    <span style={{ 
+                                                                    <span style={{
                                                                         fontSize: '12px',
                                                                         color: '#9ca3af',
                                                                         fontWeight: '500'
-                                                                    }}>
-                                                                        Middleware
-                                                                    </span>
-                                                                    <span style={{ 
+                                                                    }}>Middleware</span>
+                                                                    <span style={{
                                                                         fontSize: '12px',
                                                                         color: '#9ca3af',
                                                                         fontWeight: '500'
-                                                                    }}>
-                                                                        {project.teamProgress.bbv}
-                                                                    </span>
+                                                                    }}>{project.teamProgress.bbv}</span>
                                                                 </div>
                                                                 <div style={{
                                                                     width: '100%',
@@ -703,29 +679,25 @@ export default function Dashboard() {
                                                     </>
                                                 )}
 
-                                                {/* Legacy Implementation Progress Bar (fallback) */}
-                                                {(!project.teamProgress || Object.values(project.teamProgress).every(val => val === null)) && (
+                                                {/* Implementation Progress Bar - only show if it has a value */}
+                                                {project.implementationProgress !== null && (
                                                     <div style={{ marginBottom: '12px' }}>
-                                                        <div style={{ 
-                                                            display: 'flex', 
-                                                            justifyContent: 'space-between', 
+                                                        <div style={{
+                                                            display: 'flex',
+                                                            justifyContent: 'space-between',
                                                             alignItems: 'center',
                                                             marginBottom: '4px'
                                                         }}>
-                                                            <span style={{ 
+                                                            <span style={{
                                                                 fontSize: '12px',
                                                                 color: '#9ca3af',
                                                                 fontWeight: '500'
-                                                            }}>
-                                                                Status-based Progress
-                                                            </span>
-                                                            <span style={{ 
+                                                            }}>Implementation Progress</span>
+                                                            <span style={{
                                                                 fontSize: '12px',
                                                                 color: '#9ca3af',
                                                                 fontWeight: '500'
-                                                            }}>
-                                                                {project.implementationProgress || 0}%
-                                                            </span>
+                                                            }}>{project.implementationProgress}%</span>
                                                         </div>
                                                         <div style={{
                                                             width: '100%',
@@ -736,7 +708,7 @@ export default function Dashboard() {
                                                         }}>
                                                             <motion.div
                                                                 initial={{ width: 0 }}
-                                                                animate={{ width: `${project.implementationProgress || 0}%` }}
+                                                                animate={{ width: `${project.implementationProgress}%` }}
                                                                 transition={{ duration: 1, ease: "easeOut" }}
                                                                 style={{
                                                                     height: '100%',
