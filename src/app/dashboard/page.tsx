@@ -664,47 +664,6 @@ export default function Dashboard() {
                                                         )}
                                                     </>
                                                 )}
-
-                                                {/* Implementation Progress Bar - only show if it has a value */}
-                                                {project.implementationProgress !== null && (
-                                                    <div style={{ marginBottom: '12px' }}>
-                                                        <div style={{
-                                                            display: 'flex',
-                                                            justifyContent: 'space-between',
-                                                            alignItems: 'center',
-                                                            marginBottom: '4px'
-                                                        }}>
-                                                            <span style={{
-                                                                fontSize: '12px',
-                                                                color: '#9ca3af',
-                                                                fontWeight: '500'
-                                                            }}>Implementation Progress</span>
-                                                            <span style={{
-                                                                fontSize: '12px',
-                                                                color: '#9ca3af',
-                                                                fontWeight: '500'
-                                                            }}>{project.implementationProgress}%</span>
-                                                        </div>
-                                                        <div style={{
-                                                            width: '100%',
-                                                            height: '8px',
-                                                            backgroundColor: '#374151',
-                                                            borderRadius: '4px',
-                                                            overflow: 'hidden'
-                                                        }}>
-                                                            <motion.div
-                                                                initial={{ width: 0 }}
-                                                                animate={{ width: `${project.implementationProgress}%` }}
-                                                                transition={{ duration: 1, ease: "easeOut" }}
-                                                                style={{
-                                                                    height: '100%',
-                                                                    backgroundColor: '#f59e0b',
-                                                                    borderRadius: '4px'
-                                                                }}
-                                                            />
-                                                        </div>
-                                                    </div>
-                                                )}
                                             </div>
                                         </CardContent>
                                     </Card>
