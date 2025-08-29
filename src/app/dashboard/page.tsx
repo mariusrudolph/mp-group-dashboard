@@ -18,6 +18,9 @@ interface Project {
         bi?: string;
         bbv?: string;
     };
+    customFields?: {
+        completion?: string;
+    };
 }
 
 interface List {
@@ -430,6 +433,16 @@ export default function Dashboard() {
                                                             fontWeight: '500'
                                                         }}>
                                                             {project.overallProgress || 0}%
+                                                            {project.customFields?.completion && (
+                                                                <span style={{ 
+                                                                    fontSize: '10px', 
+                                                                    color: '#6b7280', 
+                                                                    marginLeft: '4px',
+                                                                    fontStyle: 'italic'
+                                                                }}>
+                                                                    ({project.customFields.completion})
+                                                                </span>
+                                                            )}
                                                         </span>
                                                     </div>
                                                     <div style={{

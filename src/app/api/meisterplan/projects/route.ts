@@ -52,6 +52,7 @@ interface RegularApiProject {
         cust_completion_percentage_in_boomi?: { value: string };
         cust_completion_percentage_in_bi?: { value: string };
         cust_completion_percentage_in_bbv?: { value: string };
+        cust_completion?: { value: string }; // Added for overall progress
     };
 }
 
@@ -268,43 +269,53 @@ export async function GET(request: Request) {
             // Count how many teams have progress values
             const teamsWithProgress = Object.values(teamProgress).filter(val => val !== null).length;
 
-            // If only one team has progress, use that as the main progress
-            // If multiple teams have progress, calculate average or use Connect as primary
+            // Overall project progress - prioritize cust_completion field
             let overallProgress = 0;
+            if (regularProject?.customFields?.cust_completion?.value) {
+                // Use cust_completion as primary source for overall progress
+                const completionValue = regularProject.customFields.cust_completion.value;
+                if (completionValue.includes('%')) {
+                    overallProgress = parseInt(completionValue.replace('%', ''));
+                } else if (!isNaN(parseInt(completionValue))) {
+                    overallProgress = parseInt(completionValue);
+                }
+            }
+
+            // Implementation progress - use team progress or fallback to overall
             let implementationProgress = 0;
 
             if (teamsWithProgress === 1) {
                 // Single team: use the value that exists
                 const progressValue = Object.values(teamProgress).find(val => val !== null);
                 if (progressValue) {
-                    overallProgress = parseInt(progressValue.replace('%', ''));
-                    implementationProgress = overallProgress;
+                    implementationProgress = parseInt(progressValue.replace('%', ''));
                 }
             } else if (teamsWithProgress > 1) {
                 // Multiple teams: prioritize Connect, then calculate average
                 if (teamProgress.connect) {
-                    overallProgress = parseInt(teamProgress.connect.replace('%', ''));
-                    implementationProgress = overallProgress;
+                    implementationProgress = parseInt(teamProgress.connect.replace('%', ''));
                 } else {
                     // Calculate average of all team progress values
                     const progressValues = Object.values(teamProgress)
                         .filter(val => val !== null)
                         .map(val => parseInt(val.replace('%', '')));
-
+                    
                     if (progressValues.length > 0) {
-                        overallProgress = Math.round(progressValues.reduce((a, b) => a + b, 0) / progressValues.length);
-                        implementationProgress = overallProgress;
+                        implementationProgress = Math.round(progressValues.reduce((a, b) => a + b, 0) / progressValues.length);
                     }
                 }
             }
 
-            // Fallback to status-based progress if no team progress values
+            // Fallback to status-based progress if no progress values found
             if (overallProgress === 0) {
                 overallProgress = p.projectStatus?.includes('In Progress') ? 50 :
                     p.projectStatus?.includes('Done') ? 100 :
                         p.projectStatus?.includes('Closing') ? 90 :
                             p.projectStatus?.includes('In Planning') ? 25 :
                                 p.projectStatus?.includes('Evaluation') ? 15 : 0;
+            }
+
+            if (implementationProgress === 0) {
                 implementationProgress = overallProgress;
             }
 
@@ -332,7 +343,8 @@ export async function GET(request: Request) {
                     completionInD365: regularProject.customFields.cust_completion_percentage_in_d365?.value,
                     completionInBoomi: regularProject.customFields.cust_completion_percentage_in_boomi?.value,
                     completionInBI: regularProject.customFields.cust_completion_percentage_in_bi?.value,
-                    completionInBBV: regularProject.customFields.cust_completion_percentage_in_bbv?.value
+                    completionInBBV: regularProject.customFields.cust_completion_percentage_in_bbv?.value,
+                    completion: regularProject.customFields.cust_completion?.value // Add overall completion
                 } : (p.cust_affected_systems ? {
                     affectedSystems: p.cust_affected_systems,
                     strategicInitiative: p.cust_aligned_with_strategic_initiative,
@@ -341,7 +353,8 @@ export async function GET(request: Request) {
                     implementationProgress: p.cust_implementation_progress_in_connect,
                     businessPriority: p.cust_business_priority,
                     risk: p.cust_risk,
-                    functionalArea: p.cust_functional_area
+                    functionalArea: p.cust_functional_area,
+                    completion: p.cust_completion_percentage_in_connect // Fallback to Connect completion
                 } : undefined)
             };
         });
