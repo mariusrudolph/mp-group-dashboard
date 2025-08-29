@@ -54,8 +54,9 @@ export default function Dashboard() {
             const data: ApiResponse = await response.json();
             setItems(data.items);
             setFilteredItems(data.items);
-        } catch (err: any) {
-            setError(err.message);
+        } catch (err: unknown) {
+            const errorMessage = err instanceof Error ? err.message : 'Unbekannter Fehler';
+            setError(errorMessage);
         } finally {
             setLoading(false);
         }

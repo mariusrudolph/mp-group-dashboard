@@ -71,26 +71,25 @@ interface MeisterplanProject {
 }
 
 export async function GET(req: Request) {
+    // Debug Info
+    console.log("🔍 Debug Info:");
+    console.log("- NODE_ENV:", process.env.NODE_ENV);
+    console.log("- MEISTERPLAN_TOKEN:", process.env.MEISTERPLAN_TOKEN ? "✅ Gesetzt" : "❌ Fehlt");
+    console.log("- MEISTERPLAN_SYSTEM:", process.env.MEISTERPLAN_SYSTEM);
+    console.log("- MEISTERPLAN_BASE_URL:", process.env.MEISTERPLAN_BASE_URL);
+
+    // Für Entwicklung: Mock-Daten zurückgeben
+    if (process.env.NODE_ENV === "development" && !process.env.MEISTERPLAN_TOKEN) {
+        console.log("⚠️  Verwende Mock-Daten für Entwicklung");
+        return NextResponse.json({
+            portfolio: "SAG Digital (Mock)",
+            items: MOCK_PROJECTS
+        });
+    }
+
     try {
-        // Debug: Umgebungsvariablen loggen
-        console.log("🔍 Debug Info:");
-        console.log("- NODE_ENV:", process.env.NODE_ENV);
-        console.log("- MEISTERPLAN_TOKEN:", process.env.MEISTERPLAN_TOKEN ? "✅ Gesetzt" : "❌ Nicht gesetzt");
-        console.log("- MEISTERPLAN_SYSTEM:", process.env.MEISTERPLAN_SYSTEM);
-        console.log("- MEISTERPLAN_BASE_URL:", process.env.MEISTERPLAN_BASE_URL);
-
-        // Für Entwicklung: Mock-Daten zurückgeben
-        if (process.env.NODE_ENV === "development" && !process.env.MEISTERPLAN_TOKEN) {
-            console.log("⚠️  Verwende Mock-Daten für Entwicklung");
-            return NextResponse.json({
-                portfolio: "SAG Digital",
-                items: MOCK_PROJECTS
-            });
-        }
-
         const { searchParams } = new URL(req.url);
-        const portfolioName = searchParams.get("portfolioName") || process.env.MEISTERPLAN_PORTFOLIO_NAME;
-        const listId = searchParams.get("listId");
+        const listId = searchParams.get("listId"); // NEW: Get listId from query params
 
         // 1) Portfolios über Reporting API laden
         console.log("📋 Lade Portfolios über Reporting API...");
@@ -99,43 +98,31 @@ export async function GET(req: Request) {
         console.log("✅ Portfolios geladen:", portfolios.items?.length);
 
         // 2) Portfolio "SAG Digital" finden
-        const sagDigitalPortfolio = portfolios.items?.find((p: any) =>
+        const sagDigitalPortfolio = portfolios.items?.find((p: { portfolioName?: string }) =>
             p.portfolioName?.toLowerCase().includes('sag digital') ||
             p.portfolioName?.toLowerCase().includes('sag')
         );
 
         if (!sagDigitalPortfolio) {
             console.log("⚠️  Portfolio 'SAG Digital' nicht gefunden, verwende erstes Portfolio");
-            console.log("📋 Verfügbare Portfolios:", portfolios.items?.map((p: any) => p.portfolioName));
+            console.log("📋 Verfügbare Portfolios:", portfolios.items?.map((p: { portfolioName?: string }) => p.portfolioName));
         }
 
-        const portfolioId = sagDigitalPortfolio?.portfolioId;
-        console.log("🎯 Verwende Portfolio:", sagDigitalPortfolio?.portfolioName || "Erstes verfügbares", "ID:", portfolioId);
+        console.log("🎯 Verwende Portfolio:", sagDigitalPortfolio?.portfolioName, "ID:", sagDigitalPortfolio?.portfolioId);
 
         // 3) Projekte über Reporting API laden mit Custom Fields
         console.log("🔗 Lade Projekte über Reporting API...");
-
         const projectsUrl = reportingApi.projects({
-            portfolio: portfolioId,
+            portfolio: sagDigitalPortfolio?.portfolioId,
             scenarios: "planOfRecord",
-            startDate: "2024-01-01", // Projekte ab 2024
-            finishDate: "2025-12-31", // Projekte bis Ende 2025
+            startDate: "2024-01-01",
+            finishDate: "2025-12-31",
             fields: [
-                // Standard-Felder
-                "projectScore",
-                "projectApprovedBudget",
-                "projectStatus",
-                "projectNotes",
-                "businessGoalName",
-                // Custom Fields für Connect und Strategic Initiative
-                "cust_affected_systems",
-                "cust_aligned_with_strategic_initiative",
-                "cust_stage_gate",
-                "cust_completion_percentage_in_connect",
-                "cust_implementation_progress_in_connect",
-                "cust_business_priority",
-                "cust_risk",
-                "cust_functional_area"
+                "projectScore", "projectApprovedBudget", "projectStatus", "projectNotes", "businessGoalName",
+                "cust_affected_systems", "cust_aligned_with_strategic_initiative", "cust_stage_gate",
+                "cust_completion_percentage_in_connect", "cust_implementation_progress_in_connect",
+                "cust_business_priority", "cust_risk", "cust_functional_area",
+                "cust_implementation_quarter_in_connect" // Added for "Next Quarter Projects"
             ]
         });
 
@@ -164,9 +151,9 @@ export async function GET(req: Request) {
                     filteredProjects = filteredProjects.filter((p: MeisterplanProject) =>
                         p.cust_implementation_quarter_in_connect &&
                         (p.cust_implementation_quarter_in_connect.includes('Q01/25') ||
-                            p.cust_implementation_quarter_in_connect.includes('Q02/25') ||
-                            p.cust_implementation_quarter_in_connect.includes('Q03/25') ||
-                            p.cust_implementation_quarter_in_connect.includes('Q04/25'))
+                         p.cust_implementation_quarter_in_connect.includes('Q02/25') ||
+                         p.cust_implementation_quarter_in_connect.includes('Q03/25') ||
+                         p.cust_implementation_quarter_in_connect.includes('Q04/25'))
                     );
                     break;
 
@@ -199,11 +186,11 @@ export async function GET(req: Request) {
                         p.cust_business_priority === '1' ||
                         p.cust_business_priority === '2' ||
                         (p.projectStatus &&
-                            (p.projectStatus.includes('In Progress') ||
-                                p.projectStatus.includes('In Planning') ||
-                                p.projectStatus.includes('Evaluation') ||
-                                p.projectStatus.includes('Closing') ||
-                                p.projectStatus.includes('Done')));
+                         (p.projectStatus.includes('In Progress') ||
+                          p.projectStatus.includes('In Planning') ||
+                          p.projectStatus.includes('Evaluation') ||
+                          p.projectStatus.includes('Closing') ||
+                          p.projectStatus.includes('Done')));
 
                     filteredProjects = filteredProjects.filter((p: MeisterplanProject) => isConnectRelatedDefault(p) && isStrategicDefault(p));
             }
@@ -222,11 +209,11 @@ export async function GET(req: Request) {
                 p.cust_business_priority === '1' ||
                 p.cust_business_priority === '2' ||
                 (p.projectStatus &&
-                    (p.projectStatus.includes('In Progress') ||
-                        p.projectStatus.includes('In Planning') ||
-                        p.projectStatus.includes('Evaluation') ||
-                        p.projectStatus.includes('Closing') ||
-                        p.projectStatus.includes('Done')));
+                 (p.projectStatus.includes('In Progress') ||
+                  p.projectStatus.includes('In Planning') ||
+                  p.projectStatus.includes('Evaluation') ||
+                  p.projectStatus.includes('Closing') ||
+                  p.projectStatus.includes('Done')));
 
             filteredProjects = filteredProjects.filter((p: MeisterplanProject) => isConnectRelatedDefault(p) && isStrategicDefault(p));
         }
@@ -243,14 +230,14 @@ export async function GET(req: Request) {
                 parseInt(p.cust_completion_percentage_in_connect.replace('%', '')) :
                 p.cust_implementation_progress_in_connect ?
                     (p.cust_implementation_progress_in_connect === 'Concept & Design' ? 25 :
-                        p.cust_implementation_progress_in_connect === 'In Progress' ? 50 :
-                            p.cust_implementation_progress_in_connect === 'Testing' ? 75 :
-                                p.cust_implementation_progress_in_connect === 'Go Live' ? 100 : 0) :
-                    (p.projectStatus?.includes('In Progress') ? 50 :
-                        p.projectStatus?.includes('Done') ? 100 :
-                            p.projectStatus?.includes('Closing') ? 90 :
-                                p.projectStatus?.includes('In Planning') ? 25 :
-                                    p.projectStatus?.includes('Evaluation') ? 15 : 0),
+                     p.cust_implementation_progress_in_connect === 'In Progress' ? 50 :
+                     p.cust_implementation_progress_in_connect === 'Testing' ? 75 :
+                     p.cust_implementation_progress_in_connect === 'Go Live' ? 100 : 0) :
+                (p.projectStatus?.includes('In Progress') ? 50 :
+                 p.projectStatus?.includes('Done') ? 100 :
+                 p.projectStatus?.includes('Closing') ? 90 :
+                 p.projectStatus?.includes('In Planning') ? 25 :
+                 p.projectStatus?.includes('Evaluation') ? 15 : 0),
             status: p.projectStatus,
             customFields: p.cust_affected_systems ? {
                 affectedSystems: p.cust_affected_systems,
@@ -273,10 +260,11 @@ export async function GET(req: Request) {
             portfolio: sagDigitalPortfolio?.portfolioName || "SAG Digital",
             items: data
         });
+
     } catch (error: unknown) {
         console.error("Meisterplan Reporting API Error:", error);
         const errorMessage = error instanceof Error ? error.message : "Interner Server-Fehler";
-
+        
         // Bei API-Fehlern Mock-Daten zurückgeben (nur in Entwicklung)
         if (process.env.NODE_ENV === "development") {
             console.log("⚠️  API-Fehler - Verwende Mock-Daten als Fallback");

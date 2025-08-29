@@ -35,8 +35,9 @@ export function PortfolioSelector({ onPortfolioChange, currentPortfolio }: Portf
                 }
                 const data = await res.json();
                 setPortfolios(data.items || []);
-            } catch (e: any) {
-                setError(e.message);
+            } catch (e: unknown) {
+                const errorMessage = e instanceof Error ? e.message : 'Unbekannter Fehler';
+                setError(errorMessage);
                 console.error("Fehler beim Laden der Portfolios:", e);
             } finally {
                 setLoading(false);
