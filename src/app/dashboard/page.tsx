@@ -406,20 +406,6 @@ export default function Dashboard() {
                                                         Last updated: {project.lastUpdated}
                                                     </p>
                                                 </div>
-                                                <motion.span
-                                                    initial={{ opacity: 0 }}
-                                                    animate={{ opacity: 1 }}
-                                                    style={{
-                                                        fontSize: '14px',
-                                                        color: '#9ca3af',
-                                                        fontFamily: 'monospace',
-                                                        marginLeft: '8px',
-                                                        flexShrink: 0
-                                                    }}
-                                                >
-                                                    {/* Only show percentage if overallProgress has a value */}
-                                                    {project.overallProgress !== null ? `${project.overallProgress}%` : ''}
-                                                </motion.span>
                                             </div>
                                             
                                             {/* Progress Bars */}
