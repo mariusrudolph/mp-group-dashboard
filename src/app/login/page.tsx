@@ -20,7 +20,7 @@ export default function LoginPage() {
             document.cookie = "auth-token=authenticated; path=/; max-age=86400"; // 24 Stunden
             router.push("/dashboard");
         } else {
-            setError("Falsches Passwort");
+            setError("Wrong password");
             setIsLoading(false);
         }
     };
@@ -61,7 +61,7 @@ export default function LoginPage() {
                         color: '#9ca3af',
                         margin: 0
                     }}>
-                        Bitte geben Sie das Passwort ein
+                        Please enter the password
                     </p>
                 </div>
 
@@ -71,7 +71,7 @@ export default function LoginPage() {
                             type="password"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
-                            placeholder="Passwort"
+                            placeholder="Password"
                             style={{
                                 width: '100%',
                                 padding: '16px',
@@ -132,7 +132,7 @@ export default function LoginPage() {
                             }
                         }}
                     >
-                        {isLoading ? 'Wird überprüft...' : 'Anmelden'}
+                        {isLoading ? 'Checking...' : 'Login'}
                     </button>
                 </form>
 
@@ -143,7 +143,7 @@ export default function LoginPage() {
                     color: '#6b7280'
                 }}>
                     <p style={{ margin: 0 }}>
-                        Passwort: <code style={{ backgroundColor: '#374151', padding: '2px 6px', borderRadius: '4px' }}>SAG2025!</code>
+                        Password: <code style={{ backgroundColor: '#374151', padding: '2px 6px', borderRadius: '4px' }}>SAG2025!</code>
                     </p>
                 </div>
             </motion.div>

@@ -226,7 +226,7 @@ export default function Dashboard() {
                         onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#b91c1c'}
                         onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#dc2626'}
                     >
-                        Abmelden
+                        Logout
                     </button>
                 </div>
             </header>
@@ -242,7 +242,7 @@ export default function Dashboard() {
                             color: '#9ca3af',
                             marginBottom: '8px'
                         }}>
-                            Liste auswählen:
+                            Select list:
                         </label>
                         <select
                             value={selectedList}
@@ -258,7 +258,7 @@ export default function Dashboard() {
                                 minWidth: '200px'
                             }}
                         >
-                            <option value="all">Alle Projekte</option>
+                            <option value="all">All Projects</option>
                             {lists.map((list) => (
                                 <option key={list.id} value={list.id}>
                                     {list.name}
@@ -281,11 +281,11 @@ export default function Dashboard() {
                 <div style={{ marginBottom: '24px' }}>
                     <input
                         type="text"
-                        placeholder="Suchen"
+                        placeholder="Search"
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                         onFocus={(e) => e.target.placeholder = ""}
-                        onBlur={(e) => e.target.placeholder = searchTerm ? "" : "Suchen"}
+                        onBlur={(e) => e.target.placeholder = searchTerm ? "" : "Search"}
                         style={{
                             maxWidth: '400px',
                             padding: '12px 16px',
@@ -298,14 +298,14 @@ export default function Dashboard() {
                         }}
                     />
                     <div style={{ marginTop: '8px', fontSize: '14px', color: '#9ca3af' }}>
-                        {filteredItems.length} von {items.length} Projekten angezeigt
+                        {filteredItems.length} of {items.length} projects displayed
                     </div>
                 </div>
 
                 {filteredItems.length === 0 ? (
                     <div style={{ textAlign: 'center', padding: '48px 24px' }}>
                         <p style={{ color: '#9ca3af' }}>
-                            {searchTerm ? `Keine Projekte gefunden für "${searchTerm}"` : 'Keine Projekte gefunden.'}
+                            {searchTerm ? `No projects found for "${searchTerm}"` : 'No projects found.'}
                         </p>
                     </div>
                 ) : (
@@ -370,7 +370,7 @@ export default function Dashboard() {
                                                         </p>
                                                     )}
                                                     <p style={{ fontSize: '12px', color: '#6b7280' }}>
-                                                        Zuletzt aktualisiert: {project.lastUpdated}
+                                                        Last updated: {project.lastUpdated}
                                                     </p>
                                                 </div>
                                                 <motion.span
@@ -401,7 +401,7 @@ export default function Dashboard() {
                                                         color: '#9ca3af',
                                                         fontWeight: '500'
                                                     }}>
-                                                        Gesamtfortschritt
+                                                        Overall Progress
                                                     </span>
                                                     <span style={{ 
                                                         fontSize: '12px', 
@@ -443,7 +443,7 @@ export default function Dashboard() {
                                                         color: '#9ca3af',
                                                         fontWeight: '500'
                                                     }}>
-                                                        Implementierung
+                                                        Implementation
                                                     </span>
                                                     <span style={{ 
                                                         fontSize: '12px', 

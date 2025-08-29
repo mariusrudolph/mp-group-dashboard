@@ -243,37 +243,53 @@ export async function GET(req: Request) {
 
         // 5) Projekte auf unser DTO mappen
         const data = filteredProjects.map((p: MeisterplanProject) => {
-            // Overall project progress calculation
-            const overallProgress = p.cust_overall_project_progress ? 
-                parseInt(p.cust_overall_project_progress.replace('%', '')) :
-                p.cust_completion_percentage_in_connect ?
-                    parseInt(p.cust_completion_percentage_in_connect.replace('%', '')) :
+            // Debug logging for the first few projects
+            if (data.length < 5) {
+                console.log("🔍 Project data:", {
+                    name: p.projectName || p.name,
+                    projectKey: p.projectKey,
+                    cust_completion_percentage_in_connect: p.cust_completion_percentage_in_connect,
+                    cust_implementation_progress_in_connect: p.cust_implementation_progress_in_connect,
+                    cust_overall_project_progress: p.cust_overall_project_progress,
+                    cust_development_progress: p.cust_development_progress,
+                    cust_technical_progress: p.cust_technical_progress,
+                    projectStatus: p.projectStatus
+                });
+            }
+
+            // Overall project progress calculation - use Completion Percentage in Connect as primary source
+            const overallProgress = p.cust_completion_percentage_in_connect ? 
+                parseInt(p.cust_completion_percentage_in_connect.replace('%', '')) :
+                p.cust_overall_project_progress ?
+                    parseInt(p.cust_overall_project_progress.replace('%', '')) :
                     (p.projectStatus?.includes('In Progress') ? 50 :
                      p.projectStatus?.includes('Done') ? 100 :
                      p.projectStatus?.includes('Closing') ? 90 :
                      p.projectStatus?.includes('In Planning') ? 25 :
                      p.projectStatus?.includes('Evaluation') ? 15 : 0);
 
-            // Implementation progress calculation
-            const implementationProgress = p.cust_development_progress ? 
-                parseInt(p.cust_development_progress.replace('%', '')) :
-                p.cust_technical_progress ?
-                    parseInt(p.cust_technical_progress.replace('%', '')) :
-                    p.cust_implementation_progress_in_connect ?
-                        (p.cust_implementation_progress_in_connect === 'Concept & Design' ? 25 :
-                         p.cust_implementation_progress_in_connect === 'In Progress' ? 50 :
-                         p.cust_implementation_progress_in_connect === 'Testing' ? 75 :
-                         p.cust_implementation_progress_in_connect === 'Go Live' ? 100 : 0) :
-                        overallProgress * 0.8; // Fallback: 80% of overall progress
+            // Implementation progress calculation - also use Completion Percentage in Connect
+            const implementationProgress = p.cust_completion_percentage_in_connect ? 
+                parseInt(p.cust_completion_percentage_in_connect.replace('%', '')) :
+                p.cust_development_progress ?
+                    parseInt(p.cust_development_progress.replace('%', '')) :
+                    p.cust_technical_progress ?
+                        parseInt(p.cust_technical_progress.replace('%', '')) :
+                        p.cust_implementation_progress_in_connect ?
+                            (p.cust_implementation_progress_in_connect === 'Concept & Design' ? 25 :
+                             p.cust_implementation_progress_in_connect === 'In Progress' ? 50 :
+                             p.cust_implementation_progress_in_connect === 'Testing' ? 75 :
+                             p.cust_implementation_progress_in_connect === 'Go Live' ? 100 : 0) :
+                            overallProgress; // Use overall progress as fallback
 
             return {
                 id: p.scenarioProjectId || p.projectId || p.id || '',
-                name: p.projectName || p.name || "(Unbenannt)",
+                name: p.projectName || p.name || "(Unnamed)",
                 projectKey: p.projectKey || "",
-                projectManager: p.projectManagerName || p.projectManager || "Unbekannt",
+                projectManager: p.projectManagerName || p.projectManager || "Unknown",
                 overallProgress: overallProgress,
                 implementationProgress: Math.min(implementationProgress, 100),
-                lastUpdated: p.lastChanged ? new Date(p.lastChanged).toLocaleDateString('de-DE') : "Unbekannt",
+                lastUpdated: p.lastChanged ? new Date(p.lastChanged).toLocaleDateString('en-GB') : "Unknown",
                 status: p.projectStatus,
                 customFields: p.cust_affected_systems ? {
                     affectedSystems: p.cust_affected_systems,
