@@ -6,45 +6,57 @@ import { reportingApi, reportingApiFetch } from "@/lib/meisterplan";
 const MOCK_PROJECTS = [
     {
         id: "1",
-        name: "Digital Transformation Hub",
-        projectKey: "DTH-2025-001",
-        projectManager: "Dr. Sarah Weber",
-        progress: 75
+        name: "Connect System Integration",
+        projectKey: "MPP-001",
+        projectManager: "Marius Rudolph",
+        overallProgress: 75,
+        implementationProgress: 60,
+        lastUpdated: "15.01.2025"
     },
     {
         id: "2",
-        name: "Cloud Migration Strategy",
-        projectKey: "CMS-2025-002",
-        projectManager: "Michael Schmidt",
-        progress: 45
+        name: "Virtual-Stocks Availability",
+        projectKey: "MPP-002",
+        projectManager: "Andreas Grässer",
+        overallProgress: 90,
+        implementationProgress: 75,
+        lastUpdated: "14.01.2025"
     },
     {
         id: "3",
-        name: "AI-Powered Analytics Platform",
-        projectKey: "AIP-2025-003",
-        projectManager: "Lisa Müller",
-        progress: 90
+        name: "Digital Process Automation",
+        projectKey: "MPP-003",
+        projectManager: "Sarah Müller",
+        overallProgress: 45,
+        implementationProgress: 35,
+        lastUpdated: "13.01.2025"
     },
     {
         id: "4",
         name: "Cybersecurity Enhancement",
         projectKey: "CSE-2025-004",
         projectManager: "Thomas Fischer",
-        progress: 30
+        overallProgress: 30,
+        implementationProgress: 25,
+        lastUpdated: "12.01.2025"
     },
     {
         id: "5",
         name: "Data Governance Framework",
         projectKey: "DGF-2025-005",
         projectManager: "Anna Wagner",
-        progress: 60
+        overallProgress: 60,
+        implementationProgress: 50,
+        lastUpdated: "11.01.2025"
     },
     {
         id: "6",
         name: "Digital Customer Experience",
         projectKey: "DCX-2025-006",
         projectManager: "Robert Klein",
-        progress: 85
+        overallProgress: 85,
+        implementationProgress: 70,
+        lastUpdated: "10.01.2025"
     },
 ];
 
@@ -68,6 +80,13 @@ interface MeisterplanProject {
     cust_risk?: string;
     cust_functional_area?: string;
     cust_implementation_quarter_in_connect?: string;
+    lastChanged?: string;
+    projectStart?: string;
+    projectFinish?: string;
+    projectApprovedTotalEffort?: any;
+    cust_overall_project_progress?: string;
+    cust_development_progress?: string;
+    cust_technical_progress?: string;
 }
 
 export async function GET(req: Request) {
@@ -122,7 +141,9 @@ export async function GET(req: Request) {
                 "cust_affected_systems", "cust_aligned_with_strategic_initiative", "cust_stage_gate",
                 "cust_completion_percentage_in_connect", "cust_implementation_progress_in_connect",
                 "cust_business_priority", "cust_risk", "cust_functional_area",
-                "cust_implementation_quarter_in_connect" // Added for "Next Quarter Projects"
+                "cust_implementation_quarter_in_connect", // Added for "Next Quarter Projects"
+                "lastChanged", "projectStart", "projectFinish", "projectApprovedTotalEffort",
+                "cust_overall_project_progress", "cust_development_progress", "cust_technical_progress"
             ]
         });
 
@@ -221,35 +242,51 @@ export async function GET(req: Request) {
         console.log("✅ Gefilterte Projekte:", filteredProjects.length);
 
         // 5) Projekte auf unser DTO mappen
-        const data = filteredProjects.map((p: MeisterplanProject) => ({
-            id: p.scenarioProjectId || p.projectId || p.id || '',
-            name: p.projectName || p.name || "(Unbenannt)",
-            projectKey: p.projectKey || "",
-            projectManager: p.projectManagerName || p.projectManager || "Unbekannt",
-            progress: p.cust_completion_percentage_in_connect ?
-                parseInt(p.cust_completion_percentage_in_connect.replace('%', '')) :
-                p.cust_implementation_progress_in_connect ?
-                    (p.cust_implementation_progress_in_connect === 'Concept & Design' ? 25 :
-                        p.cust_implementation_progress_in_connect === 'In Progress' ? 50 :
-                            p.cust_implementation_progress_in_connect === 'Testing' ? 75 :
-                                p.cust_implementation_progress_in_connect === 'Go Live' ? 100 : 0) :
+        const data = filteredProjects.map((p: MeisterplanProject) => {
+            // Overall project progress calculation
+            const overallProgress = p.cust_overall_project_progress ? 
+                parseInt(p.cust_overall_project_progress.replace('%', '')) :
+                p.cust_completion_percentage_in_connect ?
+                    parseInt(p.cust_completion_percentage_in_connect.replace('%', '')) :
                     (p.projectStatus?.includes('In Progress') ? 50 :
-                        p.projectStatus?.includes('Done') ? 100 :
-                            p.projectStatus?.includes('Closing') ? 90 :
-                                p.projectStatus?.includes('In Planning') ? 25 :
-                                    p.projectStatus?.includes('Evaluation') ? 15 : 0),
-            status: p.projectStatus,
-            customFields: p.cust_affected_systems ? {
-                affectedSystems: p.cust_affected_systems,
-                strategicInitiative: p.cust_aligned_with_strategic_initiative,
-                stageGate: p.cust_stage_gate,
-                completionInConnect: p.cust_completion_percentage_in_connect,
-                implementationProgress: p.cust_implementation_progress_in_connect,
-                businessPriority: p.cust_business_priority,
-                risk: p.cust_risk,
-                functionalArea: p.cust_functional_area
-            } : undefined
-        }));
+                     p.projectStatus?.includes('Done') ? 100 :
+                     p.projectStatus?.includes('Closing') ? 90 :
+                     p.projectStatus?.includes('In Planning') ? 25 :
+                     p.projectStatus?.includes('Evaluation') ? 15 : 0);
+
+            // Implementation progress calculation
+            const implementationProgress = p.cust_development_progress ? 
+                parseInt(p.cust_development_progress.replace('%', '')) :
+                p.cust_technical_progress ?
+                    parseInt(p.cust_technical_progress.replace('%', '')) :
+                    p.cust_implementation_progress_in_connect ?
+                        (p.cust_implementation_progress_in_connect === 'Concept & Design' ? 25 :
+                         p.cust_implementation_progress_in_connect === 'In Progress' ? 50 :
+                         p.cust_implementation_progress_in_connect === 'Testing' ? 75 :
+                         p.cust_implementation_progress_in_connect === 'Go Live' ? 100 : 0) :
+                        overallProgress * 0.8; // Fallback: 80% of overall progress
+
+            return {
+                id: p.scenarioProjectId || p.projectId || p.id || '',
+                name: p.projectName || p.name || "(Unbenannt)",
+                projectKey: p.projectKey || "",
+                projectManager: p.projectManagerName || p.projectManager || "Unbekannt",
+                overallProgress: overallProgress,
+                implementationProgress: Math.min(implementationProgress, 100),
+                lastUpdated: p.lastChanged ? new Date(p.lastChanged).toLocaleDateString('de-DE') : "Unbekannt",
+                status: p.projectStatus,
+                customFields: p.cust_affected_systems ? {
+                    affectedSystems: p.cust_affected_systems,
+                    strategicInitiative: p.cust_aligned_with_strategic_initiative,
+                    stageGate: p.cust_stage_gate,
+                    completionInConnect: p.cust_completion_percentage_in_connect,
+                    implementationProgress: p.cust_implementation_progress_in_connect,
+                    businessPriority: p.cust_business_priority,
+                    risk: p.cust_risk,
+                    functionalArea: p.cust_functional_area
+                } : undefined
+            };
+        });
 
         console.log("✅ Gefundene gefilterte Projekte:", data.length);
         if (data.length > 0) {

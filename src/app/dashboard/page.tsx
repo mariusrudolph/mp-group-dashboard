@@ -8,7 +8,9 @@ interface Project {
     name: string;
     projectKey?: string;
     projectManager?: string;
-    progress: number;
+    overallProgress: number;
+    implementationProgress: number;
+    lastUpdated: string;
 }
 
 interface List {
@@ -367,6 +369,9 @@ export default function Dashboard() {
                                                             PM: {project.projectManager}
                                                         </p>
                                                     )}
+                                                    <p style={{ fontSize: '12px', color: '#6b7280' }}>
+                                                        Zuletzt aktualisiert: {project.lastUpdated}
+                                                    </p>
                                                 </div>
                                                 <motion.span
                                                     initial={{ opacity: 0 }}
@@ -379,28 +384,90 @@ export default function Dashboard() {
                                                         flexShrink: 0
                                                     }}
                                                 >
-                                                    {Math.round(project.progress)}%
+                                                    {Math.round(project.overallProgress)}%
                                                 </motion.span>
                                             </div>
-                                            <div style={{ position: 'relative' }}>
+                                            
+                                            {/* Overall Progress Bar */}
+                                            <div style={{ marginBottom: '16px' }}>
+                                                <div style={{ 
+                                                    display: 'flex', 
+                                                    justifyContent: 'space-between', 
+                                                    alignItems: 'center',
+                                                    marginBottom: '8px'
+                                                }}>
+                                                    <span style={{ 
+                                                        fontSize: '12px', 
+                                                        color: '#9ca3af',
+                                                        fontWeight: '500'
+                                                    }}>
+                                                        Gesamtfortschritt
+                                                    </span>
+                                                    <span style={{ 
+                                                        fontSize: '12px', 
+                                                        color: '#3b82f6',
+                                                        fontWeight: '600'
+                                                    }}>
+                                                        {Math.round(project.overallProgress)}%
+                                                    </span>
+                                                </div>
                                                 <div style={{
-                                                    height: '8px',
+                                                    height: '6px',
                                                     backgroundColor: '#374151',
-                                                    borderRadius: '4px',
+                                                    borderRadius: '3px',
                                                     overflow: 'hidden'
                                                 }}>
                                                     <motion.div
                                                         style={{
-                                                            position: 'absolute',
-                                                            top: 0,
-                                                            left: 0,
                                                             height: '100%',
                                                             background: 'linear-gradient(90deg, #3b82f6, #8b5cf6)',
-                                                            borderRadius: '4px'
+                                                            borderRadius: '3px'
                                                         }}
                                                         initial={{ width: 0 }}
-                                                        animate={{ width: `${Math.min(100, Math.max(0, project.progress))}%` }}
+                                                        animate={{ width: `${Math.min(100, Math.max(0, project.overallProgress))}%` }}
                                                         transition={{ duration: 0.8, ease: "easeOut" }}
+                                                    />
+                                                </div>
+                                            </div>
+
+                                            {/* Implementation Progress Bar */}
+                                            <div style={{ marginBottom: '8px' }}>
+                                                <div style={{ 
+                                                    display: 'flex', 
+                                                    justifyContent: 'space-between', 
+                                                    alignItems: 'center',
+                                                    marginBottom: '8px'
+                                                }}>
+                                                    <span style={{ 
+                                                        fontSize: '12px', 
+                                                        color: '#9ca3af',
+                                                        fontWeight: '500'
+                                                    }}>
+                                                        Implementierung
+                                                    </span>
+                                                    <span style={{ 
+                                                        fontSize: '12px', 
+                                                        color: '#10b981',
+                                                        fontWeight: '600'
+                                                    }}>
+                                                        {Math.round(project.implementationProgress)}%
+                                                    </span>
+                                                </div>
+                                                <div style={{
+                                                    height: '6px',
+                                                    backgroundColor: '#374151',
+                                                    borderRadius: '3px',
+                                                    overflow: 'hidden'
+                                                }}>
+                                                    <motion.div
+                                                        style={{
+                                                            height: '100%',
+                                                            backgroundColor: '#10b981',
+                                                            borderRadius: '3px'
+                                                        }}
+                                                        initial={{ width: 0 }}
+                                                        animate={{ width: `${Math.min(100, Math.max(0, project.implementationProgress))}%` }}
+                                                        transition={{ duration: 0.8, ease: "easeOut", delay: 0.2 }}
                                                     />
                                                 </div>
                                             </div>
