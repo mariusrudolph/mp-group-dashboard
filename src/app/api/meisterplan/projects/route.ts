@@ -69,14 +69,19 @@ export async function GET(request: Request) {
         const portfoliosResponse = await reportingApiFetch(portfoliosUrl);
         const portfolios = portfoliosResponse.items || [];
         console.log("✅ Portfolios geladen:", portfolios.length);
+        
+        // Debug: Log the first portfolio to see its structure
+        if (portfolios.length > 0) {
+            console.log("🔍 First portfolio structure:", JSON.stringify(portfolios[0], null, 2));
+        }
 
         // 2) SAG Digital Portfolio finden
-        const sagDigitalPortfolio = portfolios.find((p: { portfolioName?: string }) =>
+        const sagDigitalPortfolio = portfolios.find((p: { portfolioName?: string, portfolioId?: string }) =>
             p.portfolioName === process.env.MEISTERPLAN_PORTFOLIO_NAME
         );
-        console.log("🎯 Verwende Portfolio:", process.env.MEISTERPLAN_PORTFOLIO_NAME, "ID:", sagDigitalPortfolio?.id);
+        console.log("🎯 Verwende Portfolio:", process.env.MEISTERPLAN_PORTFOLIO_NAME, "ID:", sagDigitalPortfolio?.portfolioId);
 
-        if (!sagDigitalPortfolio?.id) {
+        if (!sagDigitalPortfolio?.portfolioId) {
             throw new Error("SAG Digital Portfolio nicht gefunden");
         }
 
@@ -92,7 +97,7 @@ export async function GET(request: Request) {
             'cust_overall_project_progress', 'cust_development_progress', 'cust_technical_progress'
         ].join(',');
 
-        const reportingApiUrl = `${reportingApi.projects()}?portfolio=${sagDigitalPortfolio.id}&scenarios=planOfRecord&startDate=2024-01-01&finishDate=2025-12-31&fields=${fields}`;
+        const reportingApiUrl = `${reportingApi.projects()}?portfolio=${sagDigitalPortfolio.portfolioId}&scenarios=planOfRecord&startDate=2024-01-01&finishDate=2025-12-31&fields=${fields}`;
         console.log("🔗 Reporting API URL:", reportingApiUrl);
         console.log("🔗 Full Projects URL constructed:", reportingApiUrl);
         const projectsResponse = await reportingApiFetch(reportingApiUrl);
