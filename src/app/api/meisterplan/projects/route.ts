@@ -193,10 +193,10 @@ export async function GET(req: Request) {
                 p.cust_overall_project_progress ?
                     parseInt(p.cust_overall_project_progress.replace('%', '')) :
                     (p.projectStatus?.includes('In Progress') ? 50 :
-                     p.projectStatus?.includes('Done') ? 100 :
-                     p.projectStatus?.includes('Closing') ? 90 :
-                     p.projectStatus?.includes('In Planning') ? 25 :
-                     p.projectStatus?.includes('Evaluation') ? 15 : 0);
+                        p.projectStatus?.includes('Done') ? 100 :
+                            p.projectStatus?.includes('Closing') ? 90 :
+                                p.projectStatus?.includes('In Planning') ? 25 :
+                                    p.projectStatus?.includes('Evaluation') ? 15 : 0);
 
             // Implementation progress calculation - also use Completion Percentage in Connect
             const implementationProgress = p.cust_completion_percentage_in_connect ?
@@ -207,9 +207,9 @@ export async function GET(req: Request) {
                         parseInt(p.cust_technical_progress.replace('%', '')) :
                         p.cust_implementation_progress_in_connect ?
                             (p.cust_implementation_progress_in_connect === 'Concept & Design' ? 25 :
-                             p.cust_implementation_progress_in_connect === 'In Progress' ? 50 :
-                             p.cust_implementation_progress_in_connect === 'Testing' ? 75 :
-                             p.cust_implementation_progress_in_connect === 'Go Live' ? 100 : 0) :
+                                p.cust_implementation_progress_in_connect === 'In Progress' ? 50 :
+                                    p.cust_implementation_progress_in_connect === 'Testing' ? 75 :
+                                        p.cust_implementation_progress_in_connect === 'Go Live' ? 100 : 0) :
                             overallProgress; // Use overall progress as fallback
 
             return {
@@ -239,13 +239,19 @@ export async function GET(req: Request) {
             console.log("📊 Erste 3 Projekte:", data.slice(0, 3));
         }
 
-        return NextResponse.json(data);
+        return NextResponse.json({
+            portfolio: sagDigitalPortfolio?.portfolioName || "SAG Digital",
+            items: data
+        });
 
     } catch (error: unknown) {
         const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
         console.error('❌ Meisterplan Reporting API Error:', error);
         
         // Return empty array instead of mock data to ensure real data only
-        return NextResponse.json([], { status: 500 });
+        return NextResponse.json({
+            portfolio: "SAG Digital",
+            items: []
+        }, { status: 500 });
     }
 }

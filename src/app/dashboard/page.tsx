@@ -45,20 +45,37 @@ export default function Dashboard() {
     const fetchProjects = async (listId?: string) => {
         try {
             setLoading(true);
-            const url = listId && listId !== "all"
+            setError(null);
+            
+            const url = listId && listId !== 'all' 
                 ? `/api/meisterplan/projects?listId=${listId}`
                 : '/api/meisterplan/projects';
-
+            
             const response = await fetch(url);
             if (!response.ok) {
-                throw new Error('Fehler beim Laden der Projekte');
+                throw new Error(`HTTP error! status: ${response.status}`);
             }
-            const data: ApiResponse = await response.json();
-            setItems(data.items);
-            setFilteredItems(data.items);
+            
+            const result = await response.json();
+            
+            // Handle both old and new API response formats
+            const projects = result.items || result || [];
+            
+            if (Array.isArray(projects)) {
+                setItems(projects);
+                setFilteredItems(projects);
+            } else {
+                console.error('Unexpected API response format:', result);
+                setItems([]);
+                setFilteredItems([]);
+            }
+            
         } catch (err: unknown) {
-            const errorMessage = err instanceof Error ? err.message : 'Unbekannter Fehler';
+            const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
+            console.error('Error fetching projects:', err);
             setError(errorMessage);
+            setItems([]);
+            setFilteredItems([]);
         } finally {
             setLoading(false);
         }
@@ -298,7 +315,7 @@ export default function Dashboard() {
                         }}
                     />
                     <div style={{ marginTop: '8px', fontSize: '14px', color: '#9ca3af' }}>
-                        {filteredItems.length} of {items.length} projects displayed
+                        {filteredItems?.length || 0} of {items?.length || 0} projects displayed
                     </div>
                 </div>
 
