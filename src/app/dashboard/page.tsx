@@ -204,8 +204,28 @@ export default function Dashboard() {
                     justifyContent: 'space-between'
                 }}>
                     <div>
-                        <h1 style={{ fontSize: '24px', fontWeight: 600, margin: 0 }}>SAG Digital</h1>
+                        <h1 style={{ fontSize: '24px', fontWeight: '600', margin: 0 }}>SAG Digital</h1>
                     </div>
+                    <button
+                        onClick={() => {
+                            document.cookie = "auth-token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+                            window.location.href = '/login';
+                        }}
+                        style={{
+                            padding: '8px 16px',
+                            fontSize: '14px',
+                            backgroundColor: '#dc2626',
+                            color: '#ffffff',
+                            border: 'none',
+                            borderRadius: '6px',
+                            cursor: 'pointer',
+                            transition: 'background-color 0.2s ease'
+                        }}
+                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#b91c1c'}
+                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#dc2626'}
+                    >
+                        Abmelden
+                    </button>
                 </div>
             </header>
 
