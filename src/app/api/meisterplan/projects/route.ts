@@ -48,6 +48,10 @@ interface RegularApiProject {
         cust_risk?: { value: string };
         cust_functional_area?: { value: string };
         cust_implementation_quarter_in_connect?: { value: string };
+        cust_completion_percentage_in_d365?: { value: string };
+        cust_completion_percentage_in_boomi?: { value: string };
+        cust_completion_percentage_in_bi?: { value: string };
+        cust_completion_percentage_in_bbv?: { value: string };
     };
 }
 
@@ -69,7 +73,7 @@ export async function GET(request: Request) {
         const portfoliosResponse = await reportingApiFetch(portfoliosUrl);
         const portfolios = portfoliosResponse.items || [];
         console.log("✅ Portfolios geladen:", portfolios.length);
-        
+
         // Debug: Log the first portfolio to see its structure
         if (portfolios.length > 0) {
             console.log("🔍 First portfolio structure:", JSON.stringify(portfolios[0], null, 2));
@@ -252,38 +256,57 @@ export async function GET(request: Request) {
                 });
             }
 
-            // Overall project progress calculation - use Completion Percentage in Connect as primary source
-            const overallProgress = regularProject?.customFields?.cust_completion_percentage_in_connect?.value ?
-                parseInt(regularProject.customFields.cust_completion_percentage_in_connect.value.replace('%', '')) :
-                p.cust_completion_percentage_in_connect ?
-                    parseInt(p.cust_completion_percentage_in_connect.replace('%', '')) :
-                    regularProject?.customFields?.cust_overall_project_progress?.value ?
-                        parseInt(regularProject.customFields.cust_overall_project_progress.value.replace('%', '')) :
-                        (p.projectStatus?.includes('In Progress') ? 50 :
-                            p.projectStatus?.includes('Done') ? 100 :
-                                p.projectStatus?.includes('Closing') ? 90 :
-                                    p.projectStatus?.includes('In Planning') ? 25 :
-                                        p.projectStatus?.includes('Evaluation') ? 15 : 0);
+            // Progress calculation for multiple teams
+            const teamProgress = {
+                connect: regularProject?.customFields?.cust_completion_percentage_in_connect?.value || null,
+                d365: regularProject?.customFields?.cust_completion_percentage_in_d365?.value || null,
+                boomi: regularProject?.customFields?.cust_completion_percentage_in_boomi?.value || null,
+                bi: regularProject?.customFields?.cust_completion_percentage_in_bi?.value || null,
+                bbv: regularProject?.customFields?.cust_completion_percentage_in_bbv?.value || null
+            };
 
-            // Implementation progress calculation - also use Completion Percentage in Connect
-            const implementationProgress = regularProject?.customFields?.cust_completion_percentage_in_connect?.value ?
-                parseInt(regularProject.customFields.cust_completion_percentage_in_connect.value.replace('%', '')) :
-                p.cust_completion_percentage_in_connect ?
-                    parseInt(p.cust_completion_percentage_in_connect.replace('%', '')) :
-                    regularProject?.customFields?.cust_development_progress?.value ?
-                        parseInt(regularProject.customFields.cust_development_progress.value.replace('%', '')) :
-                        regularProject?.customFields?.cust_technical_progress?.value ?
-                            parseInt(regularProject.customFields.cust_technical_progress.value.replace('%', '')) :
-                            p.cust_development_progress ?
-                                parseInt(p.cust_development_progress.replace('%', '')) :
-                                p.cust_technical_progress ?
-                                    parseInt(p.cust_technical_progress.replace('%', '')) :
-                                    p.cust_implementation_progress_in_connect ?
-                                        (p.cust_implementation_progress_in_connect === 'Concept & Design' ? 25 :
-                                            p.cust_implementation_progress_in_connect === 'In Progress' ? 50 :
-                                                p.cust_implementation_progress_in_connect === 'Testing' ? 75 :
-                                                    p.cust_implementation_progress_in_connect === 'Go Live' ? 100 : 0) :
-                                        overallProgress; // Use overall progress as fallback
+            // Count how many teams have progress values
+            const teamsWithProgress = Object.values(teamProgress).filter(val => val !== null).length;
+
+            // If only one team has progress, use that as the main progress
+            // If multiple teams have progress, calculate average or use Connect as primary
+            let overallProgress = 0;
+            let implementationProgress = 0;
+
+            if (teamsWithProgress === 1) {
+                // Single team: use the value that exists
+                const progressValue = Object.values(teamProgress).find(val => val !== null);
+                if (progressValue) {
+                    overallProgress = parseInt(progressValue.replace('%', ''));
+                    implementationProgress = overallProgress;
+                }
+            } else if (teamsWithProgress > 1) {
+                // Multiple teams: prioritize Connect, then calculate average
+                if (teamProgress.connect) {
+                    overallProgress = parseInt(teamProgress.connect.replace('%', ''));
+                    implementationProgress = overallProgress;
+                } else {
+                    // Calculate average of all team progress values
+                    const progressValues = Object.values(teamProgress)
+                        .filter(val => val !== null)
+                        .map(val => parseInt(val.replace('%', '')));
+                    
+                    if (progressValues.length > 0) {
+                        overallProgress = Math.round(progressValues.reduce((a, b) => a + b, 0) / progressValues.length);
+                        implementationProgress = overallProgress;
+                    }
+                }
+            }
+
+            // Fallback to status-based progress if no team progress values
+            if (overallProgress === 0) {
+                overallProgress = p.projectStatus?.includes('In Progress') ? 50 :
+                                        p.projectStatus?.includes('Done') ? 100 :
+                                        p.projectStatus?.includes('Closing') ? 90 :
+                                        p.projectStatus?.includes('In Planning') ? 25 :
+                                        p.projectStatus?.includes('Evaluation') ? 15 : 0;
+                implementationProgress = overallProgress;
+            }
 
             return {
                 id: p.scenarioProjectId || p.projectId || p.id || '',
@@ -292,9 +315,10 @@ export async function GET(request: Request) {
                 projectManager: p.projectManagerName || p.projectManager || regularProject?.manager?.name || "Unknown",
                 overallProgress: overallProgress,
                 implementationProgress: Math.min(implementationProgress, 100),
-                lastUpdated: regularProject?.lastChanged ? new Date(regularProject.lastChanged).toLocaleDateString('en-GB') :
-                    p.lastChanged ? new Date(p.lastChanged).toLocaleDateString('en-GB') : "Unknown",
+                lastUpdated: regularProject?.lastChanged ? new Date(regularProject.lastChanged).toLocaleDateString('en-GB') : 
+                                   p.lastChanged ? new Date(p.lastChanged).toLocaleDateString('en-GB') : "Unknown",
                 status: p.projectStatus,
+                teamProgress: teamProgress, // Add team progress information
                 customFields: regularProject?.customFields ? {
                     affectedSystems: regularProject.customFields.cust_affected_systems?.value,
                     strategicInitiative: regularProject.customFields.cust_aligned_with_strategic_initiative?.value,
@@ -303,7 +327,12 @@ export async function GET(request: Request) {
                     implementationProgress: regularProject.customFields.cust_implementation_progress_in_connect?.value,
                     businessPriority: regularProject.customFields.cust_business_priority?.value,
                     risk: regularProject.customFields.cust_risk?.value,
-                    functionalArea: regularProject.customFields.cust_functional_area?.value
+                    functionalArea: regularProject.customFields.cust_functional_area?.value,
+                    // Add new team completion fields
+                    completionInD365: regularProject.customFields.cust_completion_percentage_in_d365?.value,
+                    completionInBoomi: regularProject.customFields.cust_completion_percentage_in_boomi?.value,
+                    completionInBI: regularProject.customFields.cust_completion_percentage_in_bi?.value,
+                    completionInBBV: regularProject.customFields.cust_completion_percentage_in_bbv?.value
                 } : (p.cust_affected_systems ? {
                     affectedSystems: p.cust_affected_systems,
                     strategicInitiative: p.cust_aligned_with_strategic_initiative,

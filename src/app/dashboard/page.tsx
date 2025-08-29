@@ -11,6 +11,13 @@ interface Project {
     overallProgress: number;
     implementationProgress: number;
     lastUpdated: string;
+    teamProgress?: {
+        connect?: string;
+        d365?: string;
+        boomi?: string;
+        bi?: string;
+        bbv?: string;
+    };
 }
 
 interface List {
@@ -405,88 +412,325 @@ export default function Dashboard() {
                                                 </motion.span>
                                             </div>
                                             
-                                            {/* Overall Progress Bar */}
-                                            <div style={{ marginBottom: '16px' }}>
-                                                <div style={{ 
-                                                    display: 'flex', 
-                                                    justifyContent: 'space-between', 
-                                                    alignItems: 'center',
-                                                    marginBottom: '8px'
-                                                }}>
-                                                    <span style={{ 
-                                                        fontSize: '12px', 
-                                                        color: '#9ca3af',
-                                                        fontWeight: '500'
+                                            {/* Progress Bars */}
+                                            <div style={{ marginTop: '16px' }}>
+                                                {/* Overall Progress Bar */}
+                                                <div style={{ marginBottom: '12px' }}>
+                                                    <div style={{ 
+                                                        display: 'flex', 
+                                                        justifyContent: 'space-between', 
+                                                        alignItems: 'center',
+                                                        marginBottom: '4px'
                                                     }}>
-                                                        Overall Progress
-                                                    </span>
-                                                    <span style={{ 
-                                                        fontSize: '12px', 
-                                                        color: '#3b82f6',
-                                                        fontWeight: '600'
+                                                        <span style={{ 
+                                                            fontSize: '12px',
+                                                            color: '#9ca3af',
+                                                            fontWeight: '500'
+                                                        }}>
+                                                            Overall Progress
+                                                        </span>
+                                                        <span style={{ 
+                                                            fontSize: '12px',
+                                                            color: '#9ca3af',
+                                                            fontWeight: '500'
+                                                        }}>
+                                                            {project.overallProgress || 0}%
+                                                        </span>
+                                                    </div>
+                                                    <div style={{
+                                                        width: '100%',
+                                                        height: '8px',
+                                                        backgroundColor: '#374151',
+                                                        borderRadius: '4px',
+                                                        overflow: 'hidden'
                                                     }}>
-                                                        {Math.round(project.overallProgress)}%
-                                                    </span>
+                                                        <motion.div
+                                                            initial={{ width: 0 }}
+                                                            animate={{ width: `${project.overallProgress || 0}%` }}
+                                                            transition={{ duration: 1, ease: "easeOut" }}
+                                                            style={{
+                                                                height: '100%',
+                                                                backgroundColor: '#10b981',
+                                                                borderRadius: '4px'
+                                                            }}
+                                                        />
+                                                    </div>
                                                 </div>
-                                                <div style={{
-                                                    height: '6px',
-                                                    backgroundColor: '#374151',
-                                                    borderRadius: '3px',
-                                                    overflow: 'hidden'
-                                                }}>
-                                                    <motion.div
-                                                        style={{
-                                                            height: '100%',
-                                                            background: 'linear-gradient(90deg, #3b82f6, #8b5cf6)',
-                                                            borderRadius: '3px'
-                                                        }}
-                                                        initial={{ width: 0 }}
-                                                        animate={{ width: `${Math.min(100, Math.max(0, project.overallProgress))}%` }}
-                                                        transition={{ duration: 0.8, ease: "easeOut" }}
-                                                    />
-                                                </div>
-                                            </div>
 
-                                            {/* Implementation Progress Bar */}
-                                            <div style={{ marginBottom: '8px' }}>
-                                                <div style={{ 
-                                                    display: 'flex', 
-                                                    justifyContent: 'space-between', 
-                                                    alignItems: 'center',
-                                                    marginBottom: '8px'
-                                                }}>
-                                                    <span style={{ 
-                                                        fontSize: '12px', 
-                                                        color: '#9ca3af',
-                                                        fontWeight: '500'
-                                                    }}>
-                                                        Implementation
-                                                    </span>
-                                                    <span style={{ 
-                                                        fontSize: '12px', 
-                                                        color: '#10b981',
-                                                        fontWeight: '600'
-                                                    }}>
-                                                        {Math.round(project.implementationProgress)}%
-                                                    </span>
-                                                </div>
-                                                <div style={{
-                                                    height: '6px',
-                                                    backgroundColor: '#374151',
-                                                    borderRadius: '3px',
-                                                    overflow: 'hidden'
-                                                }}>
-                                                    <motion.div
-                                                        style={{
-                                                            height: '100%',
-                                                            backgroundColor: '#10b981',
-                                                            borderRadius: '3px'
-                                                        }}
-                                                        initial={{ width: 0 }}
-                                                        animate={{ width: `${Math.min(100, Math.max(0, project.implementationProgress))}%` }}
-                                                        transition={{ duration: 0.8, ease: "easeOut", delay: 0.2 }}
-                                                    />
-                                                </div>
+                                                {/* Team Progress Bars */}
+                                                {project.teamProgress && (
+                                                    <>
+                                                        {/* Connect Progress */}
+                                                        {project.teamProgress.connect && (
+                                                            <div style={{ marginBottom: '12px' }}>
+                                                                <div style={{ 
+                                                                    display: 'flex', 
+                                                                    justifyContent: 'space-between', 
+                                                                    alignItems: 'center',
+                                                                    marginBottom: '4px'
+                                                                }}>
+                                                                    <span style={{ 
+                                                                        fontSize: '12px',
+                                                                        color: '#9ca3af',
+                                                                        fontWeight: '500'
+                                                                    }}>
+                                                                        Connect
+                                                                    </span>
+                                                                    <span style={{ 
+                                                                        fontSize: '12px',
+                                                                        color: '#9ca3af',
+                                                                        fontWeight: '500'
+                                                                    }}>
+                                                                        {project.teamProgress.connect}
+                                                                    </span>
+                                                                </div>
+                                                                <div style={{
+                                                                    width: '100%',
+                                                                    height: '6px',
+                                                                    backgroundColor: '#374151',
+                                                                    borderRadius: '3px',
+                                                                    overflow: 'hidden'
+                                                                }}>
+                                                                    <motion.div
+                                                                        initial={{ width: 0 }}
+                                                                        animate={{ width: project.teamProgress.connect?.replace('%', '') + '%' }}
+                                                                        transition={{ duration: 1, ease: "easeOut" }}
+                                                                        style={{
+                                                                            height: '100%',
+                                                                            backgroundColor: '#3b82f6',
+                                                                            borderRadius: '3px'
+                                                                        }}
+                                                                    />
+                                                                </div>
+                                                            </div>
+                                                        )}
+
+                                                        {/* D365 Progress */}
+                                                        {project.teamProgress.d365 && (
+                                                            <div style={{ marginBottom: '12px' }}>
+                                                                <div style={{ 
+                                                                    display: 'flex', 
+                                                                    justifyContent: 'space-between', 
+                                                                    alignItems: 'center',
+                                                                    marginBottom: '4px'
+                                                                }}>
+                                                                    <span style={{ 
+                                                                        fontSize: '12px',
+                                                                        color: '#9ca3af',
+                                                                        fontWeight: '500'
+                                                                    }}>
+                                                                        Dynamics
+                                                                    </span>
+                                                                    <span style={{ 
+                                                                        fontSize: '12px',
+                                                                        color: '#9ca3af',
+                                                                        fontWeight: '500'
+                                                                    }}>
+                                                                        {project.teamProgress.d365}
+                                                                    </span>
+                                                                </div>
+                                                                <div style={{
+                                                                    width: '100%',
+                                                                    height: '6px',
+                                                                    backgroundColor: '#374151',
+                                                                    borderRadius: '3px',
+                                                                    overflow: 'hidden'
+                                                                }}>
+                                                                    <motion.div
+                                                                        initial={{ width: 0 }}
+                                                                        animate={{ width: project.teamProgress.d365?.replace('%', '') + '%' }}
+                                                                        transition={{ duration: 1, ease: "easeOut" }}
+                                                                        style={{
+                                                                            height: '100%',
+                                                                            backgroundColor: '#8b5cf6',
+                                                                            borderRadius: '3px'
+                                                                        }}
+                                                                    />
+                                                                </div>
+                                                            </div>
+                                                        )}
+
+                                                        {/* Boomi Progress */}
+                                                        {project.teamProgress.boomi && (
+                                                            <div style={{ marginBottom: '12px' }}>
+                                                                <div style={{ 
+                                                                    display: 'flex', 
+                                                                    justifyContent: 'space-between', 
+                                                                    alignItems: 'center',
+                                                                    marginBottom: '4px'
+                                                                }}>
+                                                                    <span style={{ 
+                                                                        fontSize: '12px',
+                                                                        color: '#9ca3af',
+                                                                        fontWeight: '500'
+                                                                    }}>
+                                                                        Boomi
+                                                                    </span>
+                                                                    <span style={{ 
+                                                                        fontSize: '12px',
+                                                                        color: '#9ca3af',
+                                                                        fontWeight: '500'
+                                                                    }}>
+                                                                        {project.teamProgress.boomi}
+                                                                    </span>
+                                                                </div>
+                                                                <div style={{
+                                                                    width: '100%',
+                                                                    height: '6px',
+                                                                    backgroundColor: '#374151',
+                                                                    borderRadius: '3px',
+                                                                    overflow: 'hidden'
+                                                                }}>
+                                                                    <motion.div
+                                                                        initial={{ width: 0 }}
+                                                                        animate={{ width: project.teamProgress.boomi?.replace('%', '') + '%' }}
+                                                                        transition={{ duration: 1, ease: "easeOut" }}
+                                                                        style={{
+                                                                            height: '100%',
+                                                                            backgroundColor: '#f59e0b',
+                                                                            borderRadius: '3px'
+                                                                        }}
+                                                                    />
+                                                                </div>
+                                                            </div>
+                                                        )}
+
+                                                        {/* BI Progress */}
+                                                        {project.teamProgress.bi && (
+                                                            <div style={{ marginBottom: '12px' }}>
+                                                                <div style={{ 
+                                                                    display: 'flex', 
+                                                                    justifyContent: 'space-between', 
+                                                                    alignItems: 'center',
+                                                                    marginBottom: '4px'
+                                                                }}>
+                                                                    <span style={{ 
+                                                                        fontSize: '12px',
+                                                                        color: '#9ca3af',
+                                                                        fontWeight: '500'
+                                                                    }}>
+                                                                        Datawarehouse
+                                                                    </span>
+                                                                    <span style={{ 
+                                                                        fontSize: '12px',
+                                                                        color: '#9ca3af',
+                                                                        fontWeight: '500'
+                                                                    }}>
+                                                                        {project.teamProgress.bi}
+                                                                    </span>
+                                                                </div>
+                                                                <div style={{
+                                                                    width: '100%',
+                                                                    height: '6px',
+                                                                    backgroundColor: '#374151',
+                                                                    borderRadius: '3px',
+                                                                    overflow: 'hidden'
+                                                                }}>
+                                                                    <motion.div
+                                                                        initial={{ width: 0 }}
+                                                                        animate={{ width: project.teamProgress.bi?.replace('%', '') + '%' }}
+                                                                        transition={{ duration: 1, ease: "easeOut" }}
+                                                                        style={{
+                                                                            height: '100%',
+                                                                            backgroundColor: '#06b6d4',
+                                                                            borderRadius: '3px'
+                                                                        }}
+                                                                    />
+                                                                </div>
+                                                            </div>
+                                                        )}
+
+                                                        {/* BBV Progress */}
+                                                        {project.teamProgress.bbv && (
+                                                            <div style={{ marginBottom: '12px' }}>
+                                                                <div style={{ 
+                                                                    display: 'flex', 
+                                                                    justifyContent: 'space-between', 
+                                                                    alignItems: 'center',
+                                                                    marginBottom: '4px'
+                                                                }}>
+                                                                    <span style={{ 
+                                                                        fontSize: '12px',
+                                                                        color: '#9ca3af',
+                                                                        fontWeight: '500'
+                                                                    }}>
+                                                                        Middleware
+                                                                    </span>
+                                                                    <span style={{ 
+                                                                        fontSize: '12px',
+                                                                        color: '#9ca3af',
+                                                                        fontWeight: '500'
+                                                                    }}>
+                                                                        {project.teamProgress.bbv}
+                                                                    </span>
+                                                                </div>
+                                                                <div style={{
+                                                                    width: '100%',
+                                                                    height: '6px',
+                                                                    backgroundColor: '#374151',
+                                                                    borderRadius: '3px',
+                                                                    overflow: 'hidden'
+                                                                }}>
+                                                                    <motion.div
+                                                                        initial={{ width: 0 }}
+                                                                        animate={{ width: project.teamProgress.bbv?.replace('%', '') + '%' }}
+                                                                        transition={{ duration: 1, ease: "easeOut" }}
+                                                                        style={{
+                                                                            height: '100%',
+                                                                            backgroundColor: '#ec4899',
+                                                                            borderRadius: '3px'
+                                                                        }}
+                                                                    />
+                                                                </div>
+                                                            </div>
+                                                        )}
+                                                    </>
+                                                )}
+
+                                                {/* Legacy Implementation Progress Bar (fallback) */}
+                                                {(!project.teamProgress || Object.values(project.teamProgress).every(val => val === null)) && (
+                                                    <div style={{ marginBottom: '12px' }}>
+                                                        <div style={{ 
+                                                            display: 'flex', 
+                                                            justifyContent: 'space-between', 
+                                                            alignItems: 'center',
+                                                            marginBottom: '4px'
+                                                        }}>
+                                                            <span style={{ 
+                                                                fontSize: '12px',
+                                                                color: '#9ca3af',
+                                                                fontWeight: '500'
+                                                            }}>
+                                                                Implementation
+                                                            </span>
+                                                            <span style={{ 
+                                                                fontSize: '12px',
+                                                                color: '#9ca3af',
+                                                                fontWeight: '500'
+                                                            }}>
+                                                                {project.implementationProgress || 0}%
+                                                            </span>
+                                                        </div>
+                                                        <div style={{
+                                                            width: '100%',
+                                                            height: '8px',
+                                                            backgroundColor: '#374151',
+                                                            borderRadius: '4px',
+                                                            overflow: 'hidden'
+                                                        }}>
+                                                            <motion.div
+                                                                initial={{ width: 0 }}
+                                                                animate={{ width: `${project.implementationProgress || 0}%` }}
+                                                                transition={{ duration: 1, ease: "easeOut" }}
+                                                                style={{
+                                                                    height: '100%',
+                                                                    backgroundColor: '#f59e0b',
+                                                                    borderRadius: '4px'
+                                                                }}
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                )}
                                             </div>
                                         </CardContent>
                                     </Card>

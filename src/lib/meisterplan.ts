@@ -110,6 +110,18 @@ export interface Project {
     projectNotes?: string;
     businessGoalName?: string;
     customFields?: Record<string, unknown>;
+    // New fields for multiple progress bars
+    overallProgress?: number;
+    implementationProgress?: number;
+    lastUpdated?: string;
+    status?: string;
+    teamProgress?: {
+        connect: string | null;
+        d365: string | null;
+        boomi: string | null;
+        bi: string | null;
+        bbv: string | null;
+    };
 }
 
 export interface PortfoliosResponse {
