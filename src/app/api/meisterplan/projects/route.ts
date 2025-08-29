@@ -2,64 +2,6 @@
 import { NextResponse } from "next/server";
 import { reportingApi, reportingApiFetch } from "@/lib/meisterplan";
 
-// Mock-Daten für SAG Digital - Top Initiatives 2025
-const MOCK_PROJECTS = [
-    {
-        id: "1",
-        name: "Connect System Integration",
-        projectKey: "MPP-001",
-        projectManager: "Marius Rudolph",
-        overallProgress: 75,
-        implementationProgress: 60,
-        lastUpdated: "15.01.2025"
-    },
-    {
-        id: "2",
-        name: "Virtual-Stocks Availability",
-        projectKey: "MPP-002",
-        projectManager: "Andreas Grässer",
-        overallProgress: 90,
-        implementationProgress: 75,
-        lastUpdated: "14.01.2025"
-    },
-    {
-        id: "3",
-        name: "Digital Process Automation",
-        projectKey: "MPP-003",
-        projectManager: "Sarah Müller",
-        overallProgress: 45,
-        implementationProgress: 35,
-        lastUpdated: "13.01.2025"
-    },
-    {
-        id: "4",
-        name: "Cybersecurity Enhancement",
-        projectKey: "CSE-2025-004",
-        projectManager: "Thomas Fischer",
-        overallProgress: 30,
-        implementationProgress: 25,
-        lastUpdated: "12.01.2025"
-    },
-    {
-        id: "5",
-        name: "Data Governance Framework",
-        projectKey: "DGF-2025-005",
-        projectManager: "Anna Wagner",
-        overallProgress: 60,
-        implementationProgress: 50,
-        lastUpdated: "11.01.2025"
-    },
-    {
-        id: "6",
-        name: "Digital Customer Experience",
-        projectKey: "DCX-2025-006",
-        projectManager: "Robert Klein",
-        overallProgress: 85,
-        implementationProgress: 70,
-        lastUpdated: "10.01.2025"
-    },
-];
-
 interface MeisterplanProject {
     scenarioProjectId?: string;
     projectId?: string;
@@ -71,6 +13,7 @@ interface MeisterplanProject {
     projectManager?: string;
     projectStatus?: string;
     projectNotes?: string;
+    lastChanged?: string;
     cust_affected_systems?: string;
     cust_aligned_with_strategic_initiative?: string;
     cust_stage_gate?: string;
@@ -79,14 +22,10 @@ interface MeisterplanProject {
     cust_business_priority?: string;
     cust_risk?: string;
     cust_functional_area?: string;
-    cust_implementation_quarter_in_connect?: string;
-    lastChanged?: string;
-    projectStart?: string;
-    projectFinish?: string;
-    projectApprovedTotalEffort?: any;
     cust_overall_project_progress?: string;
     cust_development_progress?: string;
     cust_technical_progress?: string;
+    cust_implementation_quarter_in_connect?: string;
 }
 
 export async function GET(req: Request) {
@@ -96,15 +35,6 @@ export async function GET(req: Request) {
     console.log("- MEISTERPLAN_TOKEN:", process.env.MEISTERPLAN_TOKEN ? "✅ Gesetzt" : "❌ Fehlt");
     console.log("- MEISTERPLAN_SYSTEM:", process.env.MEISTERPLAN_SYSTEM);
     console.log("- MEISTERPLAN_BASE_URL:", process.env.MEISTERPLAN_BASE_URL);
-
-    // Für Entwicklung: Mock-Daten zurückgeben
-    if (process.env.NODE_ENV === "development" && !process.env.MEISTERPLAN_TOKEN) {
-        console.log("⚠️  Verwende Mock-Daten für Entwicklung");
-        return NextResponse.json({
-            portfolio: "SAG Digital (Mock)",
-            items: MOCK_PROJECTS
-        });
-    }
 
     try {
         const { searchParams } = new URL(req.url);
@@ -244,7 +174,7 @@ export async function GET(req: Request) {
         // 5) Projekte auf unser DTO mappen
         const data = filteredProjects.map((p: MeisterplanProject) => {
             // Debug logging for the first few projects
-            if (data.length < 5) {
+            if (filteredProjects.indexOf(p) < 5) {
                 console.log("🔍 Project data:", {
                     name: p.projectName || p.name,
                     projectKey: p.projectKey,
@@ -258,7 +188,7 @@ export async function GET(req: Request) {
             }
 
             // Overall project progress calculation - use Completion Percentage in Connect as primary source
-            const overallProgress = p.cust_completion_percentage_in_connect ? 
+            const overallProgress = p.cust_completion_percentage_in_connect ?
                 parseInt(p.cust_completion_percentage_in_connect.replace('%', '')) :
                 p.cust_overall_project_progress ?
                     parseInt(p.cust_overall_project_progress.replace('%', '')) :
@@ -269,7 +199,7 @@ export async function GET(req: Request) {
                      p.projectStatus?.includes('Evaluation') ? 15 : 0);
 
             // Implementation progress calculation - also use Completion Percentage in Connect
-            const implementationProgress = p.cust_completion_percentage_in_connect ? 
+            const implementationProgress = p.cust_completion_percentage_in_connect ?
                 parseInt(p.cust_completion_percentage_in_connect.replace('%', '')) :
                 p.cust_development_progress ?
                     parseInt(p.cust_development_progress.replace('%', '')) :
@@ -309,27 +239,13 @@ export async function GET(req: Request) {
             console.log("📊 Erste 3 Projekte:", data.slice(0, 3));
         }
 
-        return NextResponse.json({
-            portfolio: sagDigitalPortfolio?.portfolioName || "SAG Digital",
-            items: data
-        });
+        return NextResponse.json(data);
 
     } catch (error: unknown) {
-        console.error("Meisterplan Reporting API Error:", error);
-        const errorMessage = error instanceof Error ? error.message : "Interner Server-Fehler";
-
-        // Bei API-Fehlern Mock-Daten zurückgeben (nur in Entwicklung)
-        if (process.env.NODE_ENV === "development") {
-            console.log("⚠️  API-Fehler - Verwende Mock-Daten als Fallback");
-            return NextResponse.json({
-                portfolio: "SAG Digital (Mock)",
-                items: MOCK_PROJECTS
-            });
-        }
-
-        return NextResponse.json(
-            { error: errorMessage },
-            { status: 500 }
-        );
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+        console.error('❌ Meisterplan Reporting API Error:', error);
+        
+        // Return empty array instead of mock data to ensure real data only
+        return NextResponse.json([], { status: 500 });
     }
 }
