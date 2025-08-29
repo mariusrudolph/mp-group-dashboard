@@ -64,7 +64,9 @@ export async function GET(request: Request) {
     try {
         // 1) Portfolios über Reporting API laden
         console.log("📋 Lade Portfolios über Reporting API...");
-        const portfoliosResponse = await reportingApiFetch(reportingApi.portfolios());
+        const portfoliosUrl = reportingApi.portfolios();
+        console.log("🔗 Portfolios URL:", portfoliosUrl);
+        const portfoliosResponse = await reportingApiFetch(portfoliosUrl);
         const portfolios = portfoliosResponse.items || [];
         console.log("✅ Portfolios geladen:", portfolios.length);
 
@@ -92,7 +94,7 @@ export async function GET(request: Request) {
 
         const reportingApiUrl = `${reportingApi.projects()}?portfolio=${sagDigitalPortfolio.id}&scenarios=planOfRecord&startDate=2024-01-01&finishDate=2025-12-31&fields=${fields}`;
         console.log("🔗 Reporting API URL:", reportingApiUrl);
-
+        console.log("🔗 Full Projects URL constructed:", reportingApiUrl);
         const projectsResponse = await reportingApiFetch(reportingApiUrl);
         const reportingProjects = projectsResponse.items || [];
         console.log("✅ Projekte über Reporting API geladen:", reportingProjects.length);
