@@ -115,7 +115,7 @@ export async function GET(request: Request) {
         try {
             // Get the Plan of Record scenario ID
             const scenariosResponse = await mpFetch('/v1/scenarios');
-            const planOfRecord = scenariosResponse.items?.find((s: any) => s.name === 'Plan of Record');
+            const planOfRecord = scenariosResponse.items?.find((s: { name: string, id: string }) => s.name === 'Plan of Record');
 
             if (planOfRecord?.id) {
                 // Get projects with custom fields from regular API
@@ -357,10 +357,7 @@ export async function GET(request: Request) {
         });
 
     } catch (error: unknown) {
-        const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
         console.error('❌ Meisterplan Reporting API Error:', error);
-
-        // Return empty array instead of mock data to ensure real data only
         return NextResponse.json({
             portfolio: "SAG Digital",
             items: []

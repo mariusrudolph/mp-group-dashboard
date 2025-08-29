@@ -25,13 +25,8 @@ interface List {
     name: string;
     description: string;
     type: string;
-    filterCriteria: Record<string, string | string[]>;
-    viewConfigId?: string;
-}
-
-interface ApiResponse {
-    portfolio: string;
-    items: Project[];
+    filterCriteria: unknown[];
+    viewConfigId: string;
 }
 
 interface ListsResponse {
