@@ -49,25 +49,25 @@ const MOCK_PROJECTS = [
 ];
 
 interface MeisterplanProject {
-  scenarioProjectId?: string;
-  projectId?: string;
-  id?: string;
-  projectName?: string;
-  name?: string;
-  projectKey?: string;
-  projectManagerName?: string;
-  projectManager?: string;
-  projectStatus?: string;
-  projectNotes?: string;
-  cust_affected_systems?: string;
-  cust_aligned_with_strategic_initiative?: string;
-  cust_stage_gate?: string;
-  cust_completion_percentage_in_connect?: string;
-  cust_implementation_progress_in_connect?: string;
-  cust_business_priority?: string;
-  cust_risk?: string;
-  cust_functional_area?: string;
-  cust_implementation_quarter_in_connect?: string;
+    scenarioProjectId?: string;
+    projectId?: string;
+    id?: string;
+    projectName?: string;
+    name?: string;
+    projectKey?: string;
+    projectManagerName?: string;
+    projectManager?: string;
+    projectStatus?: string;
+    projectNotes?: string;
+    cust_affected_systems?: string;
+    cust_aligned_with_strategic_initiative?: string;
+    cust_stage_gate?: string;
+    cust_completion_percentage_in_connect?: string;
+    cust_implementation_progress_in_connect?: string;
+    cust_business_priority?: string;
+    cust_risk?: string;
+    cust_functional_area?: string;
+    cust_implementation_quarter_in_connect?: string;
 }
 
 export async function GET(req: Request) {
@@ -164,9 +164,9 @@ export async function GET(req: Request) {
                     filteredProjects = filteredProjects.filter((p: MeisterplanProject) =>
                         p.cust_implementation_quarter_in_connect &&
                         (p.cust_implementation_quarter_in_connect.includes('Q01/25') ||
-                         p.cust_implementation_quarter_in_connect.includes('Q02/25') ||
-                         p.cust_implementation_quarter_in_connect.includes('Q03/25') ||
-                         p.cust_implementation_quarter_in_connect.includes('Q04/25'))
+                            p.cust_implementation_quarter_in_connect.includes('Q02/25') ||
+                            p.cust_implementation_quarter_in_connect.includes('Q03/25') ||
+                            p.cust_implementation_quarter_in_connect.includes('Q04/25'))
                     );
                     break;
 
@@ -199,11 +199,11 @@ export async function GET(req: Request) {
                         p.cust_business_priority === '1' ||
                         p.cust_business_priority === '2' ||
                         (p.projectStatus &&
-                         (p.projectStatus.includes('In Progress') ||
-                          p.projectStatus.includes('In Planning') ||
-                          p.projectStatus.includes('Evaluation') ||
-                          p.projectStatus.includes('Closing') ||
-                          p.projectStatus.includes('Done')));
+                            (p.projectStatus.includes('In Progress') ||
+                                p.projectStatus.includes('In Planning') ||
+                                p.projectStatus.includes('Evaluation') ||
+                                p.projectStatus.includes('Closing') ||
+                                p.projectStatus.includes('Done')));
 
                     filteredProjects = filteredProjects.filter((p: MeisterplanProject) => isConnectRelatedDefault(p) && isStrategicDefault(p));
             }
@@ -222,11 +222,11 @@ export async function GET(req: Request) {
                 p.cust_business_priority === '1' ||
                 p.cust_business_priority === '2' ||
                 (p.projectStatus &&
-                 (p.projectStatus.includes('In Progress') ||
-                  p.projectStatus.includes('In Planning') ||
-                  p.projectStatus.includes('Evaluation') ||
-                  p.projectStatus.includes('Closing') ||
-                  p.projectStatus.includes('Done')));
+                    (p.projectStatus.includes('In Progress') ||
+                        p.projectStatus.includes('In Planning') ||
+                        p.projectStatus.includes('Evaluation') ||
+                        p.projectStatus.includes('Closing') ||
+                        p.projectStatus.includes('Done')));
 
             filteredProjects = filteredProjects.filter((p: MeisterplanProject) => isConnectRelatedDefault(p) && isStrategicDefault(p));
         }
@@ -243,14 +243,14 @@ export async function GET(req: Request) {
                 parseInt(p.cust_completion_percentage_in_connect.replace('%', '')) :
                 p.cust_implementation_progress_in_connect ?
                     (p.cust_implementation_progress_in_connect === 'Concept & Design' ? 25 :
-                     p.cust_implementation_progress_in_connect === 'In Progress' ? 50 :
-                     p.cust_implementation_progress_in_connect === 'Testing' ? 75 :
-                     p.cust_implementation_progress_in_connect === 'Go Live' ? 100 : 0) :
-                (p.projectStatus?.includes('In Progress') ? 50 :
-                 p.projectStatus?.includes('Done') ? 100 :
-                 p.projectStatus?.includes('Closing') ? 90 :
-                 p.projectStatus?.includes('In Planning') ? 25 :
-                 p.projectStatus?.includes('Evaluation') ? 15 : 0),
+                        p.cust_implementation_progress_in_connect === 'In Progress' ? 50 :
+                            p.cust_implementation_progress_in_connect === 'Testing' ? 75 :
+                                p.cust_implementation_progress_in_connect === 'Go Live' ? 100 : 0) :
+                    (p.projectStatus?.includes('In Progress') ? 50 :
+                        p.projectStatus?.includes('Done') ? 100 :
+                            p.projectStatus?.includes('Closing') ? 90 :
+                                p.projectStatus?.includes('In Planning') ? 25 :
+                                    p.projectStatus?.includes('Evaluation') ? 15 : 0),
             status: p.projectStatus,
             customFields: p.cust_affected_systems ? {
                 affectedSystems: p.cust_affected_systems,
