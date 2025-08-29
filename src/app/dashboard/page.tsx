@@ -16,7 +16,8 @@ interface List {
     name: string;
     description: string;
     type: string;
-    filterCriteria: Record<string, any>;
+    filterCriteria: Record<string, string | string[]>;
+    viewConfigId?: string;
 }
 
 interface ApiResponse {
@@ -26,8 +27,8 @@ interface ApiResponse {
 
 interface ListsResponse {
     lists: List[];
-    scenarios: any[];
-    portfolios: any[];
+    scenarios: unknown[];
+    portfolios: unknown[];
 }
 
 export default function Dashboard() {
@@ -67,7 +68,7 @@ export default function Dashboard() {
                 const data: ListsResponse = await response.json();
                 setLists(data.lists);
             }
-        } catch (err) {
+        } catch (err: unknown) {
             console.error('Fehler beim Laden der Listen:', err);
         }
     };

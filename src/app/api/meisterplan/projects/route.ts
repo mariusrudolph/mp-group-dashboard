@@ -1,6 +1,6 @@
 // app/api/meisterplan/projects/route.ts
 import { NextResponse } from "next/server";
-import { mpFetch, reportingApi, reportingApiFetch, type Portfolio, type Project } from "@/lib/meisterplan";
+import { reportingApi, reportingApiFetch } from "@/lib/meisterplan";
 
 // Mock-Daten für SAG Digital - Top Initiatives 2025
 const MOCK_PROJECTS = [
@@ -48,6 +48,28 @@ const MOCK_PROJECTS = [
     },
 ];
 
+interface MeisterplanProject {
+  scenarioProjectId?: string;
+  projectId?: string;
+  id?: string;
+  projectName?: string;
+  name?: string;
+  projectKey?: string;
+  projectManagerName?: string;
+  projectManager?: string;
+  projectStatus?: string;
+  projectNotes?: string;
+  cust_affected_systems?: string;
+  cust_aligned_with_strategic_initiative?: string;
+  cust_stage_gate?: string;
+  cust_completion_percentage_in_connect?: string;
+  cust_implementation_progress_in_connect?: string;
+  cust_business_priority?: string;
+  cust_risk?: string;
+  cust_functional_area?: string;
+  cust_implementation_quarter_in_connect?: string;
+}
+
 export async function GET(req: Request) {
     try {
         // Debug: Umgebungsvariablen loggen
@@ -77,14 +99,14 @@ export async function GET(req: Request) {
         console.log("✅ Portfolios geladen:", portfolios.items?.length);
 
         // 2) Portfolio "SAG Digital" finden
-        const sagDigitalPortfolio = portfolios.items?.find((p: Portfolio) =>
+        const sagDigitalPortfolio = portfolios.items?.find((p: any) =>
             p.portfolioName?.toLowerCase().includes('sag digital') ||
             p.portfolioName?.toLowerCase().includes('sag')
         );
 
         if (!sagDigitalPortfolio) {
             console.log("⚠️  Portfolio 'SAG Digital' nicht gefunden, verwende erstes Portfolio");
-            console.log("📋 Verfügbare Portfolios:", portfolios.items?.map((p: Portfolio) => p.portfolioName));
+            console.log("📋 Verfügbare Portfolios:", portfolios.items?.map((p: any) => p.portfolioName));
         }
 
         const portfolioId = sagDigitalPortfolio?.portfolioId;
@@ -132,24 +154,24 @@ export async function GET(req: Request) {
 
             switch (listId) {
                 case "top-initiatives-2025":
-                    filteredProjects = filteredProjects.filter((p: any) =>
+                    filteredProjects = filteredProjects.filter((p: MeisterplanProject) =>
                         p.cust_aligned_with_strategic_initiative === 'Yes' &&
                         (p.cust_business_priority === '1' || p.cust_business_priority === '2')
                     );
                     break;
 
-                case "next-quarter-topics":
-                    filteredProjects = filteredProjects.filter((p: any) =>
+                case "next-quarter-topics": // Renamed from next-quarter-projects
+                    filteredProjects = filteredProjects.filter((p: MeisterplanProject) =>
                         p.cust_implementation_quarter_in_connect &&
                         (p.cust_implementation_quarter_in_connect.includes('Q01/25') ||
-                            p.cust_implementation_quarter_in_connect.includes('Q02/25') ||
-                            p.cust_implementation_quarter_in_connect.includes('Q03/25') ||
-                            p.cust_implementation_quarter_in_connect.includes('Q04/25'))
+                         p.cust_implementation_quarter_in_connect.includes('Q02/25') ||
+                         p.cust_implementation_quarter_in_connect.includes('Q03/25') ||
+                         p.cust_implementation_quarter_in_connect.includes('Q04/25'))
                     );
                     break;
 
                 case "connect-projects":
-                    filteredProjects = filteredProjects.filter((p: any) =>
+                    filteredProjects = filteredProjects.filter((p: MeisterplanProject) =>
                         p.cust_affected_systems?.toLowerCase().includes('connect') ||
                         p.projectName?.toLowerCase().includes('connect') ||
                         p.projectNotes?.toLowerCase().includes('connect')
@@ -157,91 +179,78 @@ export async function GET(req: Request) {
                     break;
 
                 case "high-priority":
-                    filteredProjects = filteredProjects.filter((p: any) =>
+                    filteredProjects = filteredProjects.filter((p: MeisterplanProject) =>
                         p.cust_business_priority === '1'
                     );
                     break;
 
                 default:
                     // Standard-Filter für alle Projekte
-                    filteredProjects = filteredProjects.filter((p: any) => {
-                        // Prüfe, ob das Projekt Connect-bezogen ist
-                        const isConnectRelated =
-                            p.projectName?.toLowerCase().includes('connect') ||
-                            p.projectNotes?.toLowerCase().includes('connect') ||
-                            p.projectKey?.toLowerCase().includes('cmm') ||
-                            p.projectKey?.toLowerCase().includes('mpp') ||
-                            // Custom Fields für betroffene Systeme
-                            p.cust_affected_systems?.toLowerCase().includes('connect') ||
-                            p.cust_implementation_progress_in_connect;
+                    const isConnectRelatedDefault = (p: MeisterplanProject) =>
+                        p.projectName?.toLowerCase().includes('connect') ||
+                        p.projectNotes?.toLowerCase().includes('connect') ||
+                        p.projectKey?.toLowerCase().includes('cmm') ||
+                        p.projectKey?.toLowerCase().includes('mpp') ||
+                        p.cust_affected_systems?.toLowerCase().includes('connect') ||
+                        p.cust_implementation_progress_in_connect;
 
-                        // Prüfe, ob es eine strategische Initiative ist
-                        const isStrategic =
-                            p.cust_aligned_with_strategic_initiative === 'Yes' ||
-                            p.cust_business_priority === '1' || // Höchste Priorität
-                            p.cust_business_priority === '2' || // Hohe Priorität
-                            (p.projectStatus &&
-                                (p.projectStatus.includes('In Progress') ||
-                                    p.projectStatus.includes('In Planning') ||
-                                    p.projectStatus.includes('Evaluation') ||
-                                    p.projectStatus.includes('Closing') ||
-                                    p.projectStatus.includes('Done')));
+                    const isStrategicDefault = (p: MeisterplanProject) =>
+                        p.cust_aligned_with_strategic_initiative === 'Yes' ||
+                        p.cust_business_priority === '1' ||
+                        p.cust_business_priority === '2' ||
+                        (p.projectStatus &&
+                         (p.projectStatus.includes('In Progress') ||
+                          p.projectStatus.includes('In Planning') ||
+                          p.projectStatus.includes('Evaluation') ||
+                          p.projectStatus.includes('Closing') ||
+                          p.projectStatus.includes('Done')));
 
-                        return isConnectRelated && isStrategic;
-                    });
+                    filteredProjects = filteredProjects.filter((p: MeisterplanProject) => isConnectRelatedDefault(p) && isStrategicDefault(p));
             }
         } else {
             // Standard-Filter für alle Projekte
-            filteredProjects = filteredProjects.filter((p: any) => {
-                // Prüfe, ob das Projekt Connect-bezogen ist
-                const isConnectRelated =
-                    p.projectName?.toLowerCase().includes('connect') ||
-                    p.projectNotes?.toLowerCase().includes('connect') ||
-                    p.projectKey?.toLowerCase().includes('cmm') ||
-                    p.projectKey?.toLowerCase().includes('mpp') ||
-                    // Custom Fields für betroffene Systeme
-                    p.cust_affected_systems?.toLowerCase().includes('connect') ||
-                    p.cust_implementation_progress_in_connect;
+            const isConnectRelatedDefault = (p: MeisterplanProject) =>
+                p.projectName?.toLowerCase().includes('connect') ||
+                p.projectNotes?.toLowerCase().includes('connect') ||
+                p.projectKey?.toLowerCase().includes('cmm') ||
+                p.projectKey?.toLowerCase().includes('mpp') ||
+                p.cust_affected_systems?.toLowerCase().includes('connect') ||
+                p.cust_implementation_progress_in_connect;
 
-                // Prüfe, ob es eine strategische Initiative ist
-                const isStrategic =
-                    p.cust_aligned_with_strategic_initiative === 'Yes' ||
-                    p.cust_business_priority === '1' || // Höchste Priorität
-                    p.cust_business_priority === '2' || // Hohe Priorität
-                    (p.projectStatus &&
-                        (p.projectStatus.includes('In Progress') ||
-                            p.projectStatus.includes('In Planning') ||
-                            p.projectStatus.includes('Evaluation') ||
-                            p.projectStatus.includes('Closing') ||
-                            p.projectStatus.includes('Done')));
+            const isStrategicDefault = (p: MeisterplanProject) =>
+                p.cust_aligned_with_strategic_initiative === 'Yes' ||
+                p.cust_business_priority === '1' ||
+                p.cust_business_priority === '2' ||
+                (p.projectStatus &&
+                 (p.projectStatus.includes('In Progress') ||
+                  p.projectStatus.includes('In Planning') ||
+                  p.projectStatus.includes('Evaluation') ||
+                  p.projectStatus.includes('Closing') ||
+                  p.projectStatus.includes('Done')));
 
-                return isConnectRelated && isStrategic;
-            });
+            filteredProjects = filteredProjects.filter((p: MeisterplanProject) => isConnectRelatedDefault(p) && isStrategicDefault(p));
         }
 
         console.log("✅ Gefilterte Projekte:", filteredProjects.length);
 
         // 5) Projekte auf unser DTO mappen
-        const data = filteredProjects.map((p: any) => ({
-            id: p.scenarioProjectId || p.projectId || p.id,
+        const data = filteredProjects.map((p: MeisterplanProject) => ({
+            id: p.scenarioProjectId || p.projectId || p.id || '',
             name: p.projectName || p.name || "(Unbenannt)",
             projectKey: p.projectKey || "",
             projectManager: p.projectManagerName || p.projectManager || "Unbekannt",
             progress: p.cust_completion_percentage_in_connect ?
                 parseInt(p.cust_completion_percentage_in_connect.replace('%', '')) :
                 p.cust_implementation_progress_in_connect ?
-                    // Progress basierend auf Implementation Status
                     (p.cust_implementation_progress_in_connect === 'Concept & Design' ? 25 :
-                        p.cust_implementation_progress_in_connect === 'In Progress' ? 50 :
-                            p.cust_implementation_progress_in_connect === 'Testing' ? 75 :
-                                p.cust_implementation_progress_in_connect === 'Go Live' ? 100 : 0) :
-                    // Fallback: Status-basierte Schätzung
-                    (p.projectStatus?.includes('In Progress') ? 50 :
-                        p.projectStatus?.includes('Done') ? 100 :
-                            p.projectStatus?.includes('Closing') ? 90 :
-                                p.projectStatus?.includes('In Planning') ? 25 :
-                                    p.projectStatus?.includes('Evaluation') ? 15 : 0),
-            // Zusätzliche Felder für Debug
+                     p.cust_implementation_progress_in_connect === 'In Progress' ? 50 :
+                     p.cust_implementation_progress_in_connect === 'Testing' ? 75 :
+                     p.cust_implementation_progress_in_connect === 'Go Live' ? 100 : 0) :
+                (p.projectStatus?.includes('In Progress') ? 50 :
+                 p.projectStatus?.includes('Done') ? 100 :
+                 p.projectStatus?.includes('Closing') ? 90 :
+                 p.projectStatus?.includes('In Planning') ? 25 :
+                 p.projectStatus?.includes('Evaluation') ? 15 : 0),
             status: p.projectStatus,
             customFields: p.cust_affected_systems ? {
                 affectedSystems: p.cust_affected_systems,
@@ -264,20 +273,21 @@ export async function GET(req: Request) {
             portfolio: sagDigitalPortfolio?.portfolioName || "SAG Digital",
             items: data
         });
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error("Meisterplan Reporting API Error:", error);
+        const errorMessage = error instanceof Error ? error.message : "Interner Server-Fehler";
 
         // Bei API-Fehlern Mock-Daten zurückgeben (nur in Entwicklung)
         if (process.env.NODE_ENV === "development") {
             console.log("⚠️  API-Fehler - Verwende Mock-Daten als Fallback");
             return NextResponse.json({
-                portfolio: "SAG Digital",
+                portfolio: "SAG Digital (Mock)",
                 items: MOCK_PROJECTS
             });
         }
 
         return NextResponse.json(
-            { error: error.message || "Interner Server-Fehler" },
+            { error: errorMessage },
             { status: 500 }
         );
     }

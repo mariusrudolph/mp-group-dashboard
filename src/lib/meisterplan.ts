@@ -96,7 +96,6 @@ export interface Project {
     projectKey?: string;
     projectManager?: string;
     progress: number;
-    // Reporting API Felder
     scenarioId?: string;
     scenarioName?: string;
     scenarioProjectId?: string;
@@ -108,8 +107,7 @@ export interface Project {
     projectStatus?: string;
     projectNotes?: string;
     businessGoalName?: string;
-    // Custom Fields
-    customFields?: Record<string, any>;
+    customFields?: Record<string, unknown>;
 }
 
 export interface PortfoliosResponse {

@@ -59,6 +59,10 @@ export function PortfolioSelector({ onPortfolioChange, currentPortfolio }: Portf
         return null; // Verstecke den Selector bei Fehlern oder leeren Portfolios
     }
 
+    const handlePortfolioChange = (portfolio: Portfolio) => {
+        onPortfolioChange(portfolio.name);
+    };
+
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -84,7 +88,7 @@ export function PortfolioSelector({ onPortfolioChange, currentPortfolio }: Portf
                             transition={{ delay: index * 0.05 }}
                         >
                             <DropdownMenuItem
-                                onClick={() => onPortfolioChange(portfolio.name)}
+                                onClick={() => handlePortfolioChange(portfolio)}
                                 className="cursor-pointer hover:bg-zinc-800 focus:bg-zinc-800"
                             >
                                 <FolderOpen className="h-4 w-4 mr-2" />

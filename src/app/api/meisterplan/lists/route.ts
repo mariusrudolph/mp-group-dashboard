@@ -71,10 +71,11 @@ export async function GET() {
             portfolios: portfolios.items || []
         });
 
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error("Fehler beim Laden der Listen:", error);
+        const errorMessage = error instanceof Error ? error.message : "Interner Server-Fehler";
         return NextResponse.json(
-            { error: error.message || "Interner Server-Fehler" },
+            { error: errorMessage },
             { status: 500 }
         );
     }
